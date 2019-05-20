@@ -93,7 +93,7 @@ class Builder:
         self.jinja_env.globals['url_for'] = self.url_for
         # TODO: bootstrap (package, custom, ...
         if self.bootstrap_folder is None:
-            self.bootstrap_folder = os.path.join(package_path, 'bootstrap-3.4.1')
+            self.bootstrap_folder = os.path.join(package_path, 'bootstrap')
         # TODO: handle CSS style sheet...usually stored in static/style.css.
 
     def route(self, route, _func=None, **kwargs_deco):
@@ -378,7 +378,7 @@ class Builder:
 def render_template(template_name, **context):
     # Fetch existing Builder instance
     if not Builder.instance:
-        raise Exception("A flike.Builder instance must be created beforehand "
+        raise Exception("A flastic.Builder instance must be created beforehand "
                         "in order to use 'render_template'.")
     else:
         jinja_env = Builder.instance[0].jinja_env
