@@ -4,22 +4,21 @@ import re
 import sys
 import shutil
 import logging
-
-
 from functools import wraps
 import itertools
-
-
-
-
 from jinja2 import (Environment, ChoiceLoader, FileSystemLoader,
                     select_autoescape)
+from uuid import uuid4
 
 # Standard logging
 log = logging.getLogger(__name__)
 
+# TODO: docs
+# TODO: test units
+
 
 class Builder:
+    """...a little bit like the App class of Flask"""
     # Tracking page being rendered
     current_route = None
     # instance tracker
@@ -44,8 +43,11 @@ class Builder:
         # - Backend attributes
         self.url_root = url_root
         self.bootstrap_folder = bootstrap_folder
+        self.copy_bootstrap = False
         self.css_style_sheet = css_style_sheet
+        self.copy_css = False
         self.dest = None
+        self.static_path = None
         # TODO: self.meta = {"description": "blabla", "author": "john doe"}
         #       perhaps better as env variable
         # TODO: if not favicon: provide one
@@ -84,23 +86,30 @@ class Builder:
                             "the 'templates' option.")
         self.jinja_env = Environment(
             loader=loader,
-            autoescape=select_autoescape(['html', 'xml'])
+            # Note: autoescape stops you from injecting str into template
+            #       as in the html_image method for instance
+            # autoescape=select_autoescape(['html', 'xml'])
         )
         # - Environment variables
         # env.globals.update(
         # { 'static': staticfiles_storage.url, 'url': reverse, }
         # - Environment methods
         self.jinja_env.globals['url_for'] = self.url_for
-        # TODO: bootstrap (package, custom, ...
+        # - Provide Bootstrap Yes/No
         if self.bootstrap_folder is None:
+            self.copy_bootstrap = True
             self.bootstrap_folder = os.path.join(package_path, 'bootstrap')
-        # TODO: handle CSS style sheet...usually stored in static/style.css.
+        # Provide Css Style Sheet Yes/No
+        if self.css_style_sheet is None:
+            self.copy_css = True
+            # TODO
+            # self.css_style_sheet = os.path.join(package_path, 'style.css')
 
     def route(self, route, _func=None, **kwargs_deco):
         """
 
 
-        Route pattern: "/what/ever/route/<type:var1>/.../<type:varn>/..."
+        Route pattern: "/what/ever/route/<type:var1>/.../<type:varN>/..."
             where the different type available are:
             string	accepts any text without a slash (the default)
             int	    accepts integers
@@ -240,21 +249,32 @@ class Builder:
         return wrapper
 
     def url_for(self, name, **kwargs):
-        # TODO: restart here
+        """
+        Flask-lookalike templating function.
+        Return relative path to requested *.html file or static file
+
+        Args:
+            name: view name or 'static', str
+            **kwargs: view arguments as kwargs or 'filename' for static files
+
+        Returns: relative path, str
+        """
         # Static
         if name == 'static':
             # search for static file
-            # TODO: check if kwargs are valid
-            # TODO
+            if not 'filename' in kwargs.keys():
+                raise Exception("'filename' needs to be specify when using "
+                                "'static' in url_for")
             path = os.path.join('static', kwargs['filename'])  # for now
+            # TODO: Do we want to check if the file actually exist at that level?
         # Views
         elif name in self.web_pages.keys():
+            # get url for that particular view
             # TODO: order in kwargs matters here...how do I check that?
             #       perhaps with f"string {name}"
             path = self.web_pages[name]['route_pattern'] % tuple(kwargs.values())
             path = os.path.join(path, self.web_pages[name]['html_name'])
         else:
-            # get url for that particular view
             log.error("'%s' does not have a url_for" % name)
             return None
         # - make relative path to where it got called
@@ -263,12 +283,10 @@ class Builder:
         log.debug("relative path: %s" % relative_path)
         return relative_path
 
-    def build(self, dest=None, views=[],
-              overwrite_html=True, copy_bootstrap=True,
+    def build(self, dest=None, views=[], overwrite=True,
               static_umask=0o644, html_umask=0o644, dir_umask=0o751):
         # New attributes...not compliant with PEP but whatever
-        self.overwrite_html = overwrite_html
-        self.copy_bootstrap = copy_bootstrap
+        self.overwrite = overwrite
         self.static_umask = static_umask
         self.html_umask = html_umask
         self.dir_umask = dir_umask
@@ -304,23 +322,34 @@ class Builder:
                 log.debug("Full path: %s" % full_path)
                 if not os.path.exists(full_path):
                     os.makedirs(full_path, self.dir_umask)
-        # TODO: - Make 'static' folder & move static files where they belong
-        static_path = os.path.join(self.dest, 'static')
-        # TODO: - Make 'static' folder & move static files where they belong
-        if not os.path.exists(static_path):
-            os.makedirs(static_path)
-        # TODO: copy bootstrap & custom CSS style sheet
+        # - Make 'static' folder & move static files where they belong
+        self.static_path = os.path.join(self.dest, 'static')
+        if not os.path.exists(self.static_path):
+            os.makedirs(self.static_path)
+        # - Copy bootstrap & custom CSS style sheet
         if self.copy_bootstrap:
             for ff in os.listdir(self.bootstrap_folder):
                 orig = os.path.join(self.bootstrap_folder, ff)
-                dest = os.path.join(static_path, ff)
+                dest = os.path.join(self.static_path, ff)
                 if os.path.isfile(orig):
-                    shutil.copy(orig, dest)
+                    if os.path.exists(dest) and not self.overwrite:
+                        continue
+                    else:
+                        shutil.copy(orig, dest)
                 elif os.path.isdir(orig):
-                    shutil.copytree(orig, dest)
+                    try:
+                        shutil.copytree(orig, dest)
+                    except FileExistsError as err:
+                        if self.overwrite:  # force overwriting
+                            shutil.rmtree(dest)
+                            shutil.copytree(orig, dest)
+                        else:
+                            raise err
+        # TODO: - Copy CSS style sheet
+
 
         # - Apply umasks to static
-        self._apply_umask(static_path, self.dir_umask, self.static_umask)
+        self._apply_umask(self.static_path, self.dir_umask, self.static_umask)
 
         # - Render Templates
         # TODO: add progress bar here
@@ -347,15 +376,14 @@ class Builder:
                     #  * finally write to html file
                     self._write_html_file(html_name, route, rendered_html)
 
-
-
+    # Hidden Methods
     def _write_html_file(self, html_name, route, rendered_html):
         # Put path together
         html_path = os.path.join(
             self.dest, route, html_name)
         log.debug("html_path: %s" % html_path)
         # Overwrite check
-        if os.path.exists(html_path) and not self.overwrite_html:
+        if os.path.exists(html_path) and not self.overwrite:
             return
         # Write html file
         with open(html_path, "w") as f:
@@ -371,10 +399,141 @@ class Builder:
                 os.chmod(os.path.join(root, f), file_umask)
 
 
+# Library for "static files"...as in other files than html and bootstrap related
+class StaticFile:
+    # Storage container for aggregating static file info
+    storage = {'name': [], 'type': [], 'source': [], 'destination': []}
 
-# TODO: class Static...dev in a different file
-# TODO: class Downloadable...dev in a different file
-# TODO: def render_template(...)...bombs if no Builder is set (look in namespace)
+    def __init__(self, name, source, dest=None, handle_duplicate=False):
+        # Sanity check
+        source = os.path.abspath(source)
+        if not os.path.isfile(source):
+            raise Exception("%s either does not exist or is not a file." % source)
+        # Attributes
+        self.builder = None
+        self.name = name
+        self.source = source
+        # Note: following line will be overwritten in subclasses
+        self.type = ''
+        # Fetch existing Builder instance
+        self.builder = None
+        if Builder.instance:
+            self.builder = Builder.instance[0]
+        # File Management Strategy
+        # - define destination
+        if not dest:
+            filename = os.path.basename(source)
+        elif os.path.splitext(dest)[-1]:  # is the file name  specified in dest?
+            filename = dest
+        else:
+            filename = os.path.join(dest, os.path.basename(source))
+        # - some formatting
+        if filename[0] == '/':
+            filename = filename[1:]
+        log.debug("File Name/Destination: %s" % filename)
+        # - checking for duplicates
+        if filename not in self.storage['destination']:
+            self.destination = filename
+        else:
+            if handle_duplicate:  # define unique subfolder
+                self.destination = os.path.join(uuid4(), filename)
+            else:
+                raise Exception(
+                    "%s is already in use. Change source name or destination "
+                    "using the 'dest' option" % filename)
+        log.debug("Destination: %s" % self.destination)
+        # - aggregating static file info
+        self.storage['name'].append(name)
+        self.storage['source'].append(source)
+        self.storage['destination'].append(self.destination)
+        # Note: following line will be overwritten in subclasses
+        self.storage['type'].append(self.type)
+
+    @property
+    def url(self, current_route=None):
+        # Check point: in case this method/class is used outside of
+        #              a flastic projects
+        if not self.builder and not current_route:
+            raise Exception(
+                "A flastic.Builder instance must be created beforehand "
+                "in order to use the any Static class.\nOtherwise you need "
+                "to re-write your template and specify the 'current_route' "
+                "option for each 'url' method's call.")
+        # - make relative path to where it got called
+        dest = os.path.join(self.type, self.destination)
+        relative_path = os.path.relpath(dest, self.builder.current_route)
+        log.debug("staticfile relative path: %s" % relative_path)
+        return relative_path
+
+
+class Image(StaticFile):
+    def __init__(self, dname, source, dest=None):
+        super(Image, self).__init__(dname, source, dest=dest)
+        # Overwrite StaticFile attributes so that this type of statics end up
+        # in their own folder
+        self.type = 'images'
+        self.storage['type'][-1] = self.type
+
+    @property
+    def html_image(self):
+        img = '<img src="%s" alt="%s">' % (self.url, self.name)
+        log.debug("img: %s" % img)
+        return img
+
+
+class Download(StaticFile):
+    def __init__(self, dname, source, dest=None):
+        super(Download, self).__init__(dname, source, dest=dest)
+        # Overwrite StaticFile attributes so that this type of statics end up
+        # in their own folder
+        self.type = 'downloads'
+        self.storage['type'][-1] = self.type
+
+    @property
+    def html_download(self):
+        d_link = "<a href='%s' download>%s</a>" % (self.url, self.name)
+        log.debug("d_link: %s" % d_link)
+        return d_link
+
+
+def collect_static_files(static_root=None, overwrite=True, copy_locally=False,
+                         file_umask=0o644, dir_umask=0o751):
+    # Fetch existing Builder instance
+    if not Builder.instance and not static_root:
+        raise Exception("In order to use this function, one needs to either "
+                        "create s flastic.Builder instance beforehand or "
+                        "specify a deployment destination via the 'dest' option.")
+    elif not static_root:  # Note: user specified dest takes over
+        static_root = Builder.instance[0].dest
+
+    if not StaticFile.storage:
+        print("There is no static files to collect")
+        return
+    # File Management Strategy
+    sources = StaticFile.storage['source']
+    destinations = StaticFile.storage['destination']
+    types = StaticFile.storage['type']
+    # - Make folder architecture
+    for src, dst, tp in zip(sources, destinations, types):
+        # - making separated folder for Image, Download and StaticFile instances
+        dst = os.path.join(static_root, tp, dst)
+        dir_name = os.path.dirname(dst)
+        if dir_name and not os.path.exists(dir_name):
+            os.makedirs(dir_name, dir_umask)
+    # - Make symlink to (or copy) source files in their dest. location
+    #     Note: symlinks require a certain server/file system set-up
+        if os.path.exists(dst) and not overwrite:
+            continue
+        elif os.path.exists(dst) and overwrite:
+            os.remove(dst)
+        if not copy_locally:
+            os.symlink(src, dst)
+        else:
+            shutil.copy(src, dst)
+            os.chmod(dst, file_umask)
+
+
+# Flask-lookalikes Library
 def render_template(template_name, **context):
     # Fetch existing Builder instance
     if not Builder.instance:
@@ -395,15 +554,28 @@ if __name__ == '__main__':
 
     website = Builder("https://currents.soest.hawaii.edu/")
 
+    img = Image("random txt",
+                "/home/thomas/Desktop/Perso/Empty-wave-at-Colorado_playa_el_gigante.jpg",
+                "cruise")
+
+    dwnld = Download("Some text",
+                     "/home/thomas/Desktop/Daily_Reports/atl_explorer_logwarning.txt",
+                     dest="/test")
+
     @website.route("/home.html")
     def home():
+
         context = {'title': "Home",
+                   'img': img,
+                   'dwnld': dwnld,
                    'body': "Welcome back your home"}
         return render_template('test.html', **context)
 
     @website.route("/data/<string:ship>/<int:cruise_id>/", ship=["oleander", "bonnevie"], cruise_id=[1,2,6,89,41])
     def data_report(ship, cruise_id):
         context = {'title': ship,
+                   'img': img,
+                   'dwnld': dwnld,
                    'body': "Here is cruise %s " % cruise_id}
 
         return render_template('test.html', **context)
@@ -422,5 +594,4 @@ if __name__ == '__main__':
 
 
     website.build() #dest="./test_build")  #, views=['home', 'test_print_2'])
-
-
+    collect_static_files(copy_locally=True)
