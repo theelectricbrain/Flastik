@@ -1,0 +1,53 @@
+/*!
+ * ===Flastic 1.0===
+ * ===Author: Dr. Thomas Roc
+ *
+ * Template:
+ * target {
+ *   property: value, ..., value;
+ *   ...
+ * }
+ * ...
+ * target.class {
+ *   property: value, ..., value;
+ *   ...
+ * }
+ * ...
+ * .class {
+ *   property: value, ..., value;
+ *   ...
+ * }
+ * ...
+ * #id {
+ *   property: value, ..., value;
+ *   ...
+ * }
+ *
+ * Example:
+ * h1 {
+ *   text-align: center;
+ *   font: 15px arial, sans-serif;
+ * }
+ * body {
+ *   background-color: coral;
+ *   margin: 10px;
+ * }
+ * .row {
+ *   margin-left: -20px;
+ * }
+ * #footer {
+ *    border-top: 2px solid #AAAAAA;
+ *    margin-top: 20px;
+ *    padding: 10px 0;
+ * }
+ *
+ * Useful Ref.:
+ *  - https://www.w3schools.com/css/default.asp
+ *  - https://getbootstrap.com
+ */
+
+#footer {
+   border-top: 2px solid #AAAAAA;
+   margin-top: 20px;
+   padding: 10px 0;
+}

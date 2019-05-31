@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+<div>
+{% block body %}
+{% include "navbar.html" %}
+    {{ body_text }}
+    {% if dwnld %}<br><h3>{{ dwnld.html_download }}</h3>{% endif %}
+    {% if img %}<br><h3>{{ img.name }}: </h3>{{ img.html_image }}{% endif %}
+    <br><h3>Testing url_for from Template: "Home" = {{ url_for("hello_world") }}</h3>
+    <br>
+    <h3>
+        <a href="{{ url_for("cruise_n_data", ship="Shippy-MacShipface", cruise_id=1, folder_name="report") }}">
+            Testing url_for from Template: "Report Cruise 1 for Shippy MacShipface"
+        </a>
+    </h3>
+{% include "footer.html" %}
+</div>
+{% endblock %}
+
+
+
