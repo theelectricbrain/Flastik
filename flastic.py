@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # TODO: define copyright/license
 """
-Flastic - A Flask-like pido-framework for static websites.
+Flastic - A Flask-like pico-framework for static websites.
 (c) Copyright 2019. All Rights Reserved. See LICENSE for details.
 """
 
@@ -30,7 +30,7 @@ class Builder:
     current_route = None
     # instance tracker
     instance = []
-    # Container for web page = view + var(s) + route pattern + html name
+    # Container for web page = view + var(s) + route pattern + key args. + html name
     web_pages = {}
     routes = []
 
@@ -226,11 +226,12 @@ class Builder:
         found = re.findall(reg_expr, route)
         log.debug("Found Var.: %s" % found)
         # - sanity checks:
-        if len(found) is not len(kwargs_deco.keys()):
+        key_args = list(kwargs_deco.keys())
+        if len(found) is not len(key_args):
             raise Exception("Number of key variables does not match the number"
                             " of variables specified in the route: %s" % route)
         # - check if names are similar between route and kwargs_deco
-        if not [t[1] for t in found] == list(kwargs_deco.keys()):
+        if not [t[1] for t in found] == key_args:
             raise Exception("There is a mismatch in the naming or the order "
                             "between the kwargs and the variables specify "
                             "in %s" % route)
@@ -266,13 +267,13 @@ class Builder:
                     raise Exception("view function cannot be named 'static'. "
                                     "This name is reserved for the jinja environment.")
                 # - check if corresponding amount of variables
-                if not len(kwargs_deco.keys()) == len(args):
+                if not len(key_args) == len(args):
                     raise Exception(
                         "Number of variables in %s does not match the number "
                         "of variables specified in the route" % func.__name__)
                 #TODO: - check if names are matching between kwargs_deco and args
                 #      Dunno how to do that !? Don't think it is possible
-                # if not list(kwargs_deco.keys()) == list(args):
+                # if not key_args == list(args):
                 #     raise Exception(
                 #         "Variable names in %s's definition does not match the "
                 #         "variable names in the route" % func.__name__)
@@ -287,9 +288,10 @@ class Builder:
             self.web_pages[func.__name__] = {
                 'route_pattern': route_pattern,
                 'html_name': html_name,
+                'key_args': key_args,
                 'route_vars': route_vars,
                 'view': func}
-            log.debug("%s: %s" % (func.__name__, self.web_pages[func.__name__]))
+            log.info("%s: %s" % (func.__name__, self.web_pages[func.__name__]))
             return wrapped_func
 
         # Mechanism for handling decorator args & kwargs
@@ -317,18 +319,23 @@ class Builder:
 
         Returns: relative path, str.
         """
+        key_args = list(kwargs.keys())
         # Static
         if name == 'static':
             # search for static file
-            if not 'filename' in kwargs.keys():
+            if not 'filename' in key_args:
                 raise Exception("'filename' needs to be specify when using "
                                 "'static' in url_for")
             path = os.path.join('static', kwargs['filename'])  # for now
         # Views
         elif name in self.web_pages.keys():
             # get url for that particular view
-            # TODO: order in kwargs matters here...how do I check that?
-            #       perhaps with f"string {name}"
+            # - checking key args
+            orig_key_args = self.web_pages[name]['key_args']
+            if not key_args == orig_key_args:
+                msg = """Error: key args need to match "%s"'s original key_args.""" % name
+                msg += "\nOrig.: %s\nGiven: %s" % (orig_key_args, key_args)
+                raise Exception(msg)
             path = self.web_pages[name]['route_pattern'] % tuple(kwargs.values())
             path = os.path.join(path, self.web_pages[name]['html_name'])
         else:
@@ -595,6 +602,12 @@ class Builder:
                     required_length = len(route_vars)
                 #  * next time around
                 else:
+                    # TODO: Not sure which behavior is the best, either:
+                    #       - always match the number routes made so far
+                    #       - or to the length of last list of value
+                    #       - or combination...!?
+                    #       There are no good or bad answer here yet it would
+                    #       fundamentally change the behavior here.
                     old_route_vars = route_vars.copy()
                     route_vars = []
                     if all(isinstance(vv, list) for vv in l):  # List of list
@@ -604,11 +617,13 @@ class Builder:
                         for rr, lv in zip(old_route_vars, l):
                             for vv in lv:
                                 route_vars.append(rr + [vv])
+                        # Requirement based on "number routes made so far"
                         required_length = len(route_vars)
                     else:  # List of values
                         for rr in old_route_vars:
                             for vv in l:
                                 route_vars.append(rr + [vv])
+                        # Requirement based on "number values in list"
                         required_length = len(l)
             #  * turn inside lists into tuples
             route_vars = [tuple(lv) for lv in route_vars]
