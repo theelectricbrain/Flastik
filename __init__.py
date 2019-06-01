@@ -22,7 +22,13 @@ log = logging.getLogger(__name__)
 
 # TODO: docs
 # TODO: test units
+# TODO: review log scheme and levels
 # TODO: add log.error to raise Exception blocks
+# TODO: dev. argparsers for Builder, and collect_static_files
+# TODO: replace flastic by flastik
+# TODO: redo as an example this file:///net/moli.local/export/ipu1/uhdas_data_archive/pelican/PE19_13_Sidorovskaia/reports/index.html
+#       by Monday.
+# TODO: redo README.pdf
 
 
 class Builder:
@@ -138,7 +144,7 @@ class Builder:
             log.error(msg)
             raise Exception(msg)
         #  * package Templates
-        # TODO: double check that, if same name, user template override package template
+        # Note: if same name, user template override package template
         if use_package_templates:
             package_loader = FileSystemLoader(
                 os.path.join(self.package_path, 'base_templates'))
@@ -210,14 +216,20 @@ class Builder:
         #       https://realpython.com/primer-on-python-decorators/#more-real-world-examples
         log.debug("route: %s" % route)
         log.debug("deco kwargs: %s" % kwargs_deco)
+        # Regular expression for generic <type:var>
+        reg_expr = r"<\s*?(\b\w+\b)\s*?:\s*?(\b\w+\b)\s*?>"
         # Separate HTML file name from route
         html_name = "index.html"
         if ".html" in route.split("/")[-1]:
             html_name = route.split("/")[-1]
-            # TODO: make sure there is no logic in the html_name
+            # - making sure there is no logic in the html_name
+            if re.match(reg_expr, html_name):
+                msg = "Logic cannot be used in html file names in Flastic projects."
+                msg += "\nIt is unfortunate but it is what it is, please change '%s'" % html_name
+                log.error(msg)
+                raise Exception(msg)
             route = route.replace(html_name, '')
         # Generate routes and associated iterator
-        reg_expr = r"<\s*?(\b\w+\b)\s*?:\s*?(\b\w+\b)\s*?>"  # <type:var>
         # - base route
         route_pattern = re.sub(reg_expr, "%s", route)
         if route_pattern[0] == '/':  # remove leading '/'...collide with os.path.join
@@ -271,8 +283,8 @@ class Builder:
                     raise Exception(
                         "Number of variables in %s does not match the number "
                         "of variables specified in the route" % func.__name__)
-                #TODO: - check if names are matching between kwargs_deco and args
-                #      Dunno how to do that !? Don't think it is possible
+                # FIXME: Check if names are matching between kwargs_deco and args
+                #        Dunno how to do that !? Don't think it is possible !
                 # if not key_args == list(args):
                 #     raise Exception(
                 #         "Variable names in %s's definition does not match the "
@@ -291,11 +303,12 @@ class Builder:
                 'key_args': key_args,
                 'route_vars': route_vars,
                 'view': func}
-            log.info("%s: %s" % (func.__name__, self.web_pages[func.__name__]))
+            log.debug("Storing %s view parameters: /n%s" % (
+                func.__name__, self.web_pages[func.__name__]))
             return wrapped_func
 
         # Mechanism for handling decorator args & kwargs
-        # TODO: not sure whether I need this original block
+        # FIXME: not sure whether I need this original block !?
         # if _func is None:
         #     return wrapper
         # else:
@@ -398,7 +411,7 @@ class Builder:
             views = self.web_pages.keys()
         # Building static website:
         # - Make website dirs
-        # TODO: add progress bar here
+        # IMPROVE_ME: add progress bar here
         for name in views:
             route_pattern = self.web_pages[name]['route_pattern']
             route_vars = self.web_pages[name]['route_vars']
@@ -461,7 +474,7 @@ class Builder:
         apply_umasks(self.static_path, self.dir_umask, self.static_umask)
 
         # - Render Templates
-        # TODO: add progress bar here
+        # IMPROVE_ME: add progress bar here
         for name in views:
             route_pattern = self.web_pages[name]['route_pattern']
             route_vars = self.web_pages[name]['route_vars']
@@ -474,7 +487,7 @@ class Builder:
                 #  * then render
                 rendered_html = view()
                 #  * finally write to html file
-                log.info("Writting %s at %s" % (html_name, route))
+                log.info("Writting %s at %s/%s" % (html_name, self.dest, route))
                 self._write_html_file(html_name, route, rendered_html)
             else:
                 for vv in route_vars:
@@ -484,7 +497,7 @@ class Builder:
                     #  * then render
                     rendered_html = view(*vv)
                     #  * finally write to html file
-                    log.info("Writting %s at %s" % (html_name, route))
+                    log.info("Writting %s at %s/%s" % (html_name, self.dest, route))
                     self._write_html_file(html_name, route, rendered_html)
 
     # Static Methods
@@ -528,7 +541,7 @@ class Builder:
                 raise Exception("Error type in %s values. "
                                 "'float' type only valid for list of floats."
                                 "\nE.g. route: %s" % (var_name, route))
-            # TODO: not sure if I need that check
+            # FIXME: not sure if I need that check !?
             elif var_type == "path" and not all(os.path.exists(n) for n in var_val):
                 raise Exception("Error in %s values. "
                                 "Some of those paths do not exist."
@@ -602,12 +615,12 @@ class Builder:
                     required_length = len(route_vars)
                 #  * next time around
                 else:
-                    # TODO: Not sure which behavior is the best, either:
-                    #       - always match the number routes made so far
-                    #       - or to the length of last list of value
-                    #       - or combination...!?
-                    #       There are no good or bad answer here yet it would
-                    #       fundamentally change the behavior here.
+                    # FIXME: Not sure which behavior is the best, either:
+                    #         - always match the number routes made so far
+                    #         - or to the length of last list of value
+                    #         - or combination...!?
+                    #        There are no good or bad answer here yet it would
+                    #        fundamentally change the behavior here.
                     old_route_vars = route_vars.copy()
                     route_vars = []
                     if all(isinstance(vv, list) for vv in l):  # List of list
@@ -674,6 +687,31 @@ def apply_umasks(path, dir_umask, file_umask):
             os.chmod(os.path.join(root, d), dir_umask)
         for f in files:
             os.chmod(os.path.join(root, f), file_umask)
+
+
+# Flask-lookalikes Library
+def render_template(template_name, **context):
+    """
+    Flask-lookalike templating function.
+    Args:
+        template_name:
+        **context:
+
+    Returns:
+
+    """
+    # Fetch existing Builder instance
+    if not Builder.instance:
+        msg = """"
+        A flastic.Builder instance must be created beforehand in order to use 
+        'render_template'."""
+        raise Exception(msg)
+    else:
+        jinja_env = Builder.instance[0].jinja_env
+    # Get template through jinja template env/loader
+    template = jinja_env.get_template(template_name)
+    return template.render(**context)
+    # print(template.render(**context))
 
 
 # Library for "static files"...as in other files than html and bootstrap related
@@ -805,6 +843,7 @@ class Image(StaticFile):
         img = '<img src="%s" alt="%s">' % (self.url, self.name)
         log.debug("img: %s" % img)
         return img
+    # TODO: add similar templating methods specific to images below
 
 
 class Download(StaticFile):
@@ -839,6 +878,7 @@ class Download(StaticFile):
         d_link = "<a href='%s' download>%s</a>" % (self.url, self.name)
         log.debug("d_link: %s" % d_link)
         return d_link
+    # TODO: add similar templating methods specific to downloads below
 
 
 def collect_static_files(static_root=None, overwrite=True, copy_locally=False,
@@ -896,22 +936,6 @@ def collect_static_files(static_root=None, overwrite=True, copy_locally=False,
             os.chmod(dst, file_umask)
 
 
-# Flask-lookalikes Library
-def render_template(template_name, **context):
-    # Fetch existing Builder instance
-    if not Builder.instance:
-        msg = """"
-        A flastic.Builder instance must be created beforehand in order to use 
-        'render_template'."""
-        raise Exception(msg)
-    else:
-        jinja_env = Builder.instance[0].jinja_env
-    # Get template through jinja template env/loader
-    template = jinja_env.get_template(template_name)
-    return template.render(**context)
-    # print(template.render(**context))
-
-
 if __name__ == '__main__':
     # TODO: def standard argument parsers for flastik projects
     # Command line arguments to parse per group:
@@ -923,40 +947,8 @@ if __name__ == '__main__':
     #                          file_umask, dir_umask
 
     # TODO: def. different handler per log level (console + file or just file)
-    # TODO: def. log standard format
-
-
-    # website = Builder("https://currents.soest.hawaii.edu/")
-    #
-    # img = Image("random txt",
-    #             "/home/thomas/Desktop/Perso/Empty-wave-at-Colorado_playa_el_gigante.jpg",
-    #             "cruise/something_else.jpg")
-    #
-    # dwnld = Download("Some text",
-    #                  "/home/thomas/Desktop/Daily_Reports/atl_explorer_logwarning.txt",
-    #                  dest="/test")
-    #
-    # # @website.route("/home.html")
-    # def home():
-    #
-    #     context = {'title': "Home",
-    #                'img': img,
-    #                'dwnld': dwnld,
-    #                'body': "Welcome back your home"}
-    #     return render_template('test.html', **context)
-    #
-    # @website.route("/data/<string:ship>/<int:cruise_id>/", ship=["oleander", "bonnevie"], cruise_id=[1,2,6,89,41])
-    # def data_report(ship, cruise_id):
-    #     context = {'title': ship,
-    #                'img': img,
-    #                'dwnld': dwnld,
-    #                'body': "Here is cruise %s " % cruise_id}
-    #     return render_template('test.html', **context)
-
 
     # TODO: Turn into Test Unit
-    # TODO: add list of lists tests
-    # TODO: add test for url_for with complex views, in template and views
     website = Builder(log_level='INFO')
 
     img = Image("Default Icon",

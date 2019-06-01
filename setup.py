@@ -15,12 +15,12 @@ setup(name='Flastic',
       packages=['flastic'],
       package_dir={'flastic': ''},
       package_data={'flastic': [
+            'README.pdf',
             'base_templates/*',
             'bootstrap/css/*',
             'bootstrap/img/*',
             'bootstrap/jquery/*',
             'bootstrap/js/*',]},
       install_requires=['jinja2'],
-      py_modules=['flastic']
       )
 
