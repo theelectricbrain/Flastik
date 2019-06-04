@@ -1,27 +1,22 @@
 <!-- Navigation -->
-<div class="navbar">
-  <div class="navbar-inner">
-    <div class="container">
 
-      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-      <a class="btn btn-navbar" data-toggle="collapse" data-target="#flastic-nav-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </a>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">{{ project_name }}</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
-      <!-- Be sure to leave the brand out there if you want it shown -->
-      <a class="brand" href="#">{{ project_name }}</a>
+  <!-- Everything you want hidden at 940px or less, place within here -->
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      {% for link in navbar_links %}
+      <li class="nav-item active">
+        <a class="nav-link" href="{{ link.url }}">{{ link.name }}</a>
+      </li>
+      {% endfor %}
 
-      <!-- Everything you want hidden at 940px or less, place within here -->
-      <div class="nav-collapse collapse" id="flastic-nav-collapse">
-        <ul class="nav">
-            {% for link in navbar_links %}
-            <li><a href="{{ link.url }}">{{ link.name }}</a></li>
-            {% endfor %}
-        </ul>
-      </div>
-
-    </div>
+    </ul>
   </div>
-</div>
+</nav>
+
+

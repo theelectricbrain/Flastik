@@ -9,20 +9,14 @@
     <meta name="{{ key }}" content="{{ meta[key] }}">
         {% endfor %}
     {% endif %}
-
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
     <!-- Bootstrap CSS -->
 	<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" type='text/css'>
-    <link href="{{ url_for('static', filename='css/bootstrap-responsive.min.css') }}" rel="stylesheet" type='text/css'>
-
     <!-- Custom CSS stylesheet -->
     <link href="{{ url_for('static', filename='stylesheet.css') }}" rel="stylesheet" type='text/css'>
-
     <!-- Block Title -->
     <title>{% block title %}{% endblock %}</title>
-
     <!-- Block Header -->
     {% block head %}{% endblock %}
 </head>
@@ -30,12 +24,12 @@
 <!-- Block Title -->
 <body>
     {% block body %}{% endblock %}
-
     <!-- JQuery -->
-    <script src="{{ url_for('static', filename='jquery/jquery-3.4.1.min.js') }}"></script>
-
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery/jquery-3.4.1.min.js') }}"></script>
+    <!-- Popper -->
+    <script type="text/javascript" src="{{ url_for('static', filename='popper/popper.min.js') }} "></script>
     <!-- Bootstrap  Core JavaScript -->
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 </body>
 
 </html>
