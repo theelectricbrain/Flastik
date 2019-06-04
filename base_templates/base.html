@@ -20,12 +20,6 @@
     <!-- Custom CSS stylesheet -->
     <link href="{{ url_for('static', filename='stylesheet.css') }}" rel="stylesheet" type='text/css'>
 
-    <!-- JQuery -->
-    <script src="{{ url_for('static', filename='jquery/jquery-3.4.1.min.js') }}"></script>
-
-    <!-- Bootstrap  Core JavaScript -->
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-
     <!-- Block Title -->
     <title>{% block title %}{% endblock %}</title>
 
@@ -36,6 +30,12 @@
 <!-- Block Title -->
 <body>
     {% block body %}{% endblock %}
+
+    <!-- JQuery -->
+    <script src="{{ url_for('static', filename='jquery/jquery-3.4.1.min.js') }}"></script>
+
+    <!-- Bootstrap  Core JavaScript -->
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 </body>
 
 </html>

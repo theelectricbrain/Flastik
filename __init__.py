@@ -353,6 +353,7 @@ class Builder:
             path = os.path.join(path, self.web_pages[name]['html_name'])
         else:
             log.error("'%s' does not have a url_for" % name)
+            # TODO: Do I wan to raise here and make it less permissive
             return None
         # - make relative path to where it got called
         log.debug("current route: %s " % self.current_route)
@@ -621,6 +622,7 @@ class Builder:
                     #         - or combination...!?
                     #        There are no good or bad answer here yet it would
                     #        fundamentally change the behavior here.
+                    #         See 'Scheme#'
                     old_route_vars = route_vars.copy()
                     route_vars = []
                     if all(isinstance(vv, list) for vv in l):  # List of list
@@ -630,14 +632,18 @@ class Builder:
                         for rr, lv in zip(old_route_vars, l):
                             for vv in lv:
                                 route_vars.append(rr + [vv])
-                        # Requirement based on "number routes made so far"
-                        required_length = len(route_vars)
+                        # Scheme1 - depending on previous:
+                        # - Requirement based on "number routes made so far"
+                        # required_length = len(route_vars)
                     else:  # List of values
                         for rr in old_route_vars:
                             for vv in l:
                                 route_vars.append(rr + [vv])
-                        # Requirement based on "number values in list"
-                        required_length = len(l)
+                        # Scheme1 - depending on previous:
+                        # - Requirement based on "number values in list"
+                        # required_length = len(l)
+                    # Scheme2 - always match number of existing routes:
+                    required_length = len(route_vars)
             #  * turn inside lists into tuples
             route_vars = [tuple(lv) for lv in route_vars]
         return route_vars
@@ -884,7 +890,7 @@ class Download(StaticFile):
 def collect_static_files(static_root=None, overwrite=True, copy_locally=False,
                          file_umask=0o644, dir_umask=0o755):
     """
-    Collects all StaticFile (and Child classes) instances and deploy them at
+    Collects all StaticFile's (and Child classes') instances and deploy them at
     the web site root directory
 
     Keyword Args:
