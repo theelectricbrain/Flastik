@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-# TODO: define copyright/license
 """
-FlasTik - A Flask-like Tiny-framework for static websites.
-(c) Copyright 2019. All Rights Reserved. See LICENSE for details.
+Flastik - A Flask-like Tiny-framework for static websites.
+(c) Copyright 2019. See LICENSE for details.
 """
 
 import os
@@ -89,7 +88,7 @@ class Builder:
             msg += "\nMust be CRITICAL, ERROR, WARNING, INFO or DEBUG"
             log.error(msg)
             raise Exception(msg)
-        log_handler = logging.FileHandler('flastic_%s.log' % log_level)
+        log_handler = logging.FileHandler('flastik_%s.log' % log_level)
         log_format = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         log.addHandler(log_handler)
@@ -221,7 +220,7 @@ class Builder:
             html_name = route.split("/")[-1]
             # - making sure there is no logic in the html_name
             if re.match(reg_expr, html_name):
-                msg = "Logic cannot be used in html file names in Flastic projects."
+                msg = "Logic cannot be used in html file names in Flastik projects."
                 msg += "\nIt is unfortunate but it is what it is, please change '%s'" % html_name
                 log.error(msg)
                 raise Exception(msg)
@@ -853,7 +852,7 @@ def render_template(template_name, **context):
     # Fetch existing Builder instance
     if not Builder.instance:
         msg = """"
-        A flastic.Builder instance must be created beforehand in order to use 
+        A flastik.Builder instance must be created beforehand in order to use 
         'render_template'."""
         log.error(msg)
         raise Exception(msg)
@@ -952,7 +951,7 @@ class StaticFile:
         #              a flastic projects
         if not self.builder and not current_route:
             msg = """
-            A flastic.Builder instance must be created beforehand in order to 
+            A flastik.Builder instance must be created beforehand in order to 
             use the any Static class.Otherwise you need to re-write your 
             template and specify the 'current_route' option for each 'url' 
             method's call."""
@@ -1054,7 +1053,7 @@ def collect_static_files(static_root=None, overwrite_static=True, copy_locally=F
     if not Builder.instance and not static_root:
         msg = """"
         In order to use this function, one needs to either create a 
-        flastic.Builder instance beforehand or specify a deployment 
+        flastik.Builder instance beforehand or specify a deployment 
         destination via the 'dest' option."""
         # TODO: log.error first...everywhere
         log.error(msg)

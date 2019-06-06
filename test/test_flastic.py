@@ -1,15 +1,19 @@
 #!/usr/bin/env python
+"""
+Flastik - A Flask-like Tiny-framework for static websites.
+(c) Copyright 2019. See LICENSE for details.
+"""
 import os
 import shutil
 import sys
 from argparse import ArgumentParser
 from glob import glob
 # Templating imports
-from flastic import Builder, render_template
+from flastik import Builder, render_template
 # Static files imports
-from flastic import Image, Download, collect_static_files
+from flastik import Image, Download, collect_static_files
 # Argument parsers imports
-from flastic import (add_Builder_arguments, add_build_arguments,
+from flastik import (add_Builder_arguments, add_build_arguments,
                       add_collect_static_files_arguments)
 
 
@@ -21,7 +25,7 @@ context = {
         {'name': 'home', 'url': "?"},
         {'name': 'test', 'url': 'https://www.surfline.com'},
     ],
-    'footer_link': {'name': 'Flastic - Copyright 2019', 'url': 'https://www.surfline.com'},
+    'footer_link': {'name': 'Flastik - Copyright 2019', 'url': 'https://www.surfline.com'},
 }
 
 ship_list = ["Shippy-MacShipface", "Boatty-MacBoatface"]
@@ -94,7 +98,7 @@ hello_world_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div class="col-md-2"><a href="https://www.surfline.com">Flastic - Copyright 2019</a></div>
+        <div class="col-md-2"><a href="https://www.surfline.com">Flastik - Copyright 2019</a></div>
     </div>
 </div>
 
@@ -169,7 +173,7 @@ cruise_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div class="col-md-2"><a href="https://www.surfline.com">Flastic - Copyright 2019</a></div>
+        <div class="col-md-2"><a href="https://www.surfline.com">Flastik - Copyright 2019</a></div>
     </div>
 </div>
 
@@ -245,7 +249,7 @@ cruise_n_data_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div class="col-md-2"><a href="https://www.surfline.com">Flastic - Copyright 2019</a></div>
+        <div class="col-md-2"><a href="https://www.surfline.com">Flastik - Copyright 2019</a></div>
     </div>
 </div>
 

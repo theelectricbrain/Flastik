@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # TODO: define copyright/license
 """
-FlasTik - A Flask-like Tiny-framework for static websites.
-(c) Copyright 2019. All Rights Reserved. See LICENSE for details.
+Flastik - A Flask-like Tiny-framework for static websites.
+(c) Copyright 2019. See LICENSE for details.
 """
 import pytest
 from setuptools import setup, Command
@@ -22,16 +22,18 @@ class TestCommand(Command):
         pytest.main(["./"])
 
 
-setup(name='Flastic',
+setup(name='Flastik',
       version='1.0',
       description='A Flask-like Tiny-framework for static websites',
       author='Dr. Thomas Roc',
       author_email='info@electricbrain.fr',
+      license='GNU GPLv3',
       # url='https://www.python.org/sigs/distutils-sig/',
-      packages=['flastic'],
-      package_dir={'flastic': ''},
-      package_data={'flastic': [
+      packages=['flastik'],
+      package_dir={'flastik': ''},
+      package_data={'flastik': [
           'README.pdf',
+          'LICENSE.txt',
           'base_templates/*',
           'bootstrap/css/*',
           'bootstrap/popper/*',
