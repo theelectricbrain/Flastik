@@ -407,12 +407,9 @@ class Builder:
         if dest is None:
             self.dest = os.path.join(os.getcwd(), 'build')
         else:
-            if os.path.isdir(dest):
-                self.dest = dest
-            else:
-                msg = "the provided destination does not exist: %s" % dest
-                log.error(msg)
-                raise Exception(msg)
+            if not os.path.isdir(dest):
+                os.makedirs(dest, dir_umask)
+            self.dest = dest
         log.info("Website destination: %s" % self.dest)
         if not type(views) == list:
             views = [views]
@@ -1132,78 +1129,3 @@ def add_collect_static_files_arguments(arg_parser):
     return arg_parser
 
 
-if __name__ == '__main__':
-    # Define Argument parser
-    arg_parser = ArgumentParser()
-    # - add Builder's arg
-    arg_parser = add_Builder_arguments(arg_parser)
-    # - add build's arg
-    arg_parser = add_build_arguments(arg_parser)
-    # - add collect_static_files' arg
-    arg_parser = add_collect_static_files_arguments(arg_parser)
-
-    # Parse commend line args.
-    arglist = sys.argv[1:]
-    options = vars(arg_parser.parse_args(args=arglist))
-
-    # TODO: Turn into Test Unit
-    # TODO: - make test based on the html so generated
-    # TODO: - make test on excepted static file locations
-    website = Builder(**options)
-
-    img = Image("Default Icon",
-                os.path.join(website.package_path, "base_templates/default_icon.png"),
-                dest="test/something_else.png")
-
-    dwnld = Download("README",
-                     os.path.join(website.package_path, "README.pdf"))
-
-    # General context for navbar and footer
-    context = {
-        'project_name': 'project_name',
-        'navbar_links': [
-            {'name': 'home', 'url': "?"},
-            {'name': 'test', 'url': 'https://www.surfline.com'},
-        ],
-        'footer_link': {'name': 'Flastic - Copyright 2019', 'url': 'https://www.surfline.com'},
-    }
-
-    ship_list = ["Shippy-MacShipface", "Boatty-MacBoatface"]
-    cruise_list = [[1, 2], [99, 98, 97]]
-
-    @website.route("/hello_world.html")
-    def hello_world():
-        context['img'] = img
-        context['dwnld'] = dwnld
-        context['title'] = "Hello World !"
-        context['body_text'] = '<h2>Hello World !</h2>'
-        pattern = "\n<br><a href='%s/cruise/%s/report/index.html'>%s: report for cruise %s</a>"
-        for ship, cruises in zip(ship_list, cruise_list):
-            for cruise_id in cruises:
-                context['body_text'] += pattern % (ship, cruise_id, ship, cruise_id)
-        return render_template('test.html', **context)
-
-    @website.route("/<string:ship>/cruise/<int:cruise_id>/",
-                   ship=ship_list, cruise_id=cruise_list)
-    def cruise_report(ship, cruise_id):
-        context['dwnld'] = ""
-        context['title'] = "%s: Cruise %s" % (ship, cruise_id)
-        # Testing "url_for" call from view
-        context['navbar_links'][0]['url'] = website.url_for('hello_world')
-        context['body_text'] = '<h2>This cruise %s. Hail to the %s !</h2>' % (cruise_id, ship)
-        return render_template('test.html', **context)
-
-
-    @website.route("/<string:ship>/cruise/<int:cruise_id>/<string:folder_name>/",
-                   ship=ship_list, cruise_id=cruise_list, folder_name=['data', 'report'])
-    def cruise_n_data(ship, cruise_id, folder_name):
-        context['dwnld'] = ""
-        context['title'] = "%s - %s" % (folder_name, ship)
-        # Testing "url_for" call from view
-        context['navbar_links'][0]['url'] = website.url_for('hello_world')
-        context['body_text'] = "<h2>Welcome to the %s folder for the %s cruise of the %s</h2>" % (
-            folder_name, cruise_id, ship)
-        return render_template('test.html', **context)
-
-    website.build(**options)
-    collect_static_files(**options)
