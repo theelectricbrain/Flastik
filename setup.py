@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # TODO: define copyright/license
 """
-Flastic - A Flask-like pico-framework for static websites.
+FlasTik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019. All Rights Reserved. See LICENSE for details.
 """
 from distutils.core import setup
 
 setup(name='Flastic',
       version='1.0',
-      description='A Flask-like pico-framework for static websites',
-      author='Dr. Thomas',
-      author_email='troc@hawaii.edu',
+      description='A Flask-like Tiny-framework for static websites',
+      author='Dr. Thomas Roc',
+      author_email='info@electricbrain.fr',
       # url='https://www.python.org/sigs/distutils-sig/',
       packages=['flastic'],
       package_dir={'flastic': ''},

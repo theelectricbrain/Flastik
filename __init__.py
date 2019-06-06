@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # TODO: define copyright/license
 """
-Flastic - A Flask-like pico-framework for static websites.
+FlasTik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019. All Rights Reserved. See LICENSE for details.
 """
 
@@ -10,9 +10,9 @@ import re
 import sys
 import shutil
 import logging
-import traceback
-from functools import wraps
 import itertools
+from argparse import ArgumentParser
+from functools import wraps
 from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 from jinja2 import select_autoescape
 from uuid import uuid4
@@ -20,10 +20,9 @@ from uuid import uuid4
 # Standard logging
 log = logging.getLogger(__name__)
 
-# TODO: docs
 # TODO: test units
 # TODO: dev. argparsers for Builder, and collect_static_files
-# TODO: replace flastic by flastik
+# TODO: replace flastic by FlasTik
 # TODO: redo README.pdf
 
 
@@ -39,9 +38,9 @@ class Builder:
     def __init__(self, templates=None, use_package_templates=True,
                  bootstrap_folder=None, css_style_sheet=None,
                  favicon=None, meta={}, description=None, author=None,
-                 log_level='ERROR'):
+                 log_level='ERROR', **kwargs):
         """
-        Pico-framework designed to be used like the App Class of Flask.
+        Tiny-framework designed to be used like the App Class of Flask.
         Defines the overall project environment as well as provides functions,
         methods and decorators for templating, routing and building static
         websites.
@@ -371,7 +370,7 @@ class Builder:
         return relative_path
 
     def build(self, dest=None, views=[], overwrite=True,
-              static_umask=0o655, html_umask=0o644, dir_umask=0o751):
+              static_umask=0o655, html_umask=0o644, dir_umask=0o751, **kwargs):
         """
         Build and deploy the static website project, that is:
          - Make web site folder tree (to destination if specified)
@@ -391,14 +390,13 @@ class Builder:
                     suite will be overwritten.
 
             static_umask: U-mask for Bootstrap suite, U-mask code
-                Default value: 0o655
+                Default value: 0o655, Operating-system mode bitfield.
 
             html_umask: U-mask for *.html files, U-mask code
-                Default value: 0o644
+                Default value: 0o644, Operating-system mode bitfield.
 
             dir_umask: U-mask for directories, U-mask code
-                Default value: 0o751
-
+                Default value: 0o751, Operating-system mode bitfield.
         """
         # New attributes...not compliant with PEP but whatever
         self.overwrite = overwrite
@@ -435,6 +433,8 @@ class Builder:
                         os.path.join(self.dest, route_pattern % vv))
             for full_path in full_paths:
                 if not os.path.exists(full_path):
+                    if type(self.dir_umask) == str:
+                        self.dir_umask = int(self.dir_umask, 8)
                     os.makedirs(full_path, self.dir_umask)
                     log.debug("Making %s" % full_path)
         # - Make 'static' folder & move static files where they belong
@@ -705,6 +705,8 @@ class Builder:
         with open(html_path, "w") as f:
             f.write(rendered_html)
         #  * change permission
+        if type(self.html_umask) == str:
+            self.html_umask = int(self.html_umask, 8)
         os.chmod(html_path, self.html_umask)
 
 
@@ -728,23 +730,128 @@ def check_path_for_illegal_characters(path):
 
 
 def apply_umasks(path, dir_umask, file_umask):
+    """
+    Applies both dir. and file umasks recursively all the way to destination path
+
+    Args:
+        path: destination path, str.
+        dir_umask: directory umask, Operating-system mode bitfield
+        file_umask: file umask, Operating-system mode bitfield
+    """
+    if type(dir_umask) == str:
+        dir_umask = int(dir_umask, 8)
+    if type(file_umask) == str:
+        file_umask = int(file_umask, 8)
     for root, dirs, files in os.walk(path):
+        os.chmod(root, dir_umask)
         for d in dirs:
             os.chmod(os.path.join(root, d), dir_umask)
         for f in files:
             os.chmod(os.path.join(root, f), file_umask)
 
 
+def add_Builder_arguments(arg_parser):
+    """
+    Adds all arguments related to the 'Builder' class to a given ArgumentParser instance
+    Returns an extended ArgumentParser instance
+
+    Args:
+        arg_parser: ArgumentParser instance
+
+    Returns: ArgumentParser instance
+    """
+    arg_parser.add_argument("--log_level", dest="log_level",
+                            type=str, nargs='?', default='ERROR',
+                            help="Defines the logging level, str." +
+                                 " Choose from 'CRITICAL', 'ERROR'," +
+                                 "'WARNING', 'INFO' or 'DEBUG')")
+    arg_parser.add_argument("--templates", dest="templates",
+                            type=str, nargs='?',
+                            help="path to template folder, str. " +
+                                 "Your templates are added to the" +
+                                 '"base templates" provided in the package' +
+                                 "(see README.pdf)")
+    arg_parser.add_argument("--use_package_templates", dest="use_package_templates",
+                            type=bool, nargs='?', default=True,
+                            help='If True (default): "base templates"' +
+                                 ' will be available in the template environment.' +
+                                 "\nIf False: they won't.")
+    arg_parser.add_argument("--bootstrap_folder", dest="bootstrap_folder",
+                            type=str, nargs='?',
+                            help="""path to bootstrap folder, str.
+                If None (default): a complete distribution of Bootstrap 2.3.2
+                    will be used and copied in static_website_root/static at
+                    built/deployment
+                Otherwise: specified will be used and linked to""")
+    arg_parser.add_argument("--css_style_sheet", dest="css_style_sheet",
+                            type=str, nargs='?',
+                            help="""path to *.css stylesheet file, str.
+                If None (default): a blank stylesheet will be provided, used
+                    and copied in static_website_root/static at built/deployment
+                Otherwise: specified will be used and linked to""")
+    arg_parser.add_argument("--favicon", dest="favicon",
+                            type=str, nargs='?',
+                            help="""path to web browser tab icon, str.
+                if None (default): a generic python icon will be used and
+                    copied in static_website_root/static at built/deployment
+                Otherwise: specified will be used and copied to static""")
+    arg_parser.add_argument("--description", dest="description",
+                            type=str, nargs='?',
+                            help="""web site's description (meta info.), str.""")
+    arg_parser.add_argument("--author", dest="author",
+                            type=str, nargs='?',
+                            help=""" web site's author (meta info.), str.""")
+
+    return arg_parser
+
+
+def add_build_arguments(arg_parser):
+    """
+    Adds all arguments related to the 'build' method to a given ArgumentParser instance
+    Returns an extended ArgumentParser instance
+
+    Args:
+        arg_parser: ArgumentParser instance
+
+    Returns: ArgumentParser instance
+    """
+    arg_parser.add_argument("--dest", dest="dest",
+                            type=str, nargs='?',
+                            help="""path to deployment destination, str.
+                If None (default): the web site will be built in ./build""")
+    arg_parser.add_argument("--views", dest="views",
+                            type=str, nargs='+', default=[],
+                            help="""list of views to be built, [str.,...,str.]
+                Note: All views are built by default.""")
+    arg_parser.add_argument("--overwrite", dest="overwrite",
+                            type=bool, nargs='?', default=True,
+                            help="""If True (default): pre-existing *.html 
+                            files and Bootstrap suite will be overwritten.""")
+    arg_parser.add_argument("--static_umask", dest="static_umask",
+                            type=str, nargs='?', default=0o655,
+                            help="""U-mask for Bootstrap suite, U-mask code
+                Default value: 0o655, Operating-system mode bitfield.""")
+    arg_parser.add_argument("--html_umask", dest="html_umask",
+                            type=str, nargs='?', default=0o644,
+                            help="""U-mask for *.html files, U-mask code
+                Default value: 0o644, Operating-system mode bitfield.""")
+    arg_parser.add_argument("--dir_umask", dest="dir_umask",
+                            type=str, nargs='?', default=0o751,
+                            help="""U-mask for directories, U-mask code
+                Default value: 0o751, Operating-system mode bitfield.""")
+    return arg_parser
+
+
 # Flask-lookalikes Library
 def render_template(template_name, **context):
     """
     Flask-lookalike templating function.
+    Renders give template.
+
     Args:
-        template_name:
-        **context:
-
-    Returns:
-
+        template_name: template name, str
+        **context: dictionary of templating variables, dict.
+          Ex.: context = {'var_name_1': var_val_1,...,'var_name_N': var_val_N}
     """
     # Fetch existing Builder instance
     if not Builder.instance:
@@ -929,22 +1036,22 @@ class Download(StaticFile):
     # TODO: add similar templating methods specific to downloads below
 
 
-def collect_static_files(static_root=None, overwrite=True, copy_locally=False,
-                         file_umask=0o644, dir_umask=0o755):
+def collect_static_files(static_root=None, overwrite_static=True, copy_locally=False,
+                         file_umask=0o644, folder_umask=0o755, **kwargs):
     """
     Collects all StaticFile's (and Child classes') instances and deploy them at
     the web site root directory
 
     Keyword Args:
         static_root: path to site root directory, str.
-        overwrite: boolean switch, bool.
+        overwrite_static: boolean switch, bool.
           If True (default): existing static files will be overwritten
           If False: they won't
         copy_locally: boolean switch, bool.
           If True: static files will copied locally
           If False (default): symlinks will be used instead
-        file_umask: u-mask for files
-        dir_umask: u-mask for directories
+        file_umask: u-mask for files, Operating-system mode bitfield.
+        folder_umask: u-mask for static folders, Operating-system mode bitfield.
     """
     # Fetch existing Builder instance
     if not Builder.instance and not static_root:
@@ -971,13 +1078,14 @@ def collect_static_files(static_root=None, overwrite=True, copy_locally=False,
         dst = os.path.join(static_root, tp, dst)
         dir_name = os.path.dirname(dst)
         if dir_name and not os.path.exists(dir_name):
-
-            os.makedirs(dir_name, dir_umask)
+            if type(folder_umask) == str:
+                folder_umask = int(folder_umask, 8)
+            os.makedirs(dir_name, folder_umask)
     # - Make symlink to (or copy) source files in their dest. location
     #     Note: symlinks require a certain server/file system set-up
-        if os.path.exists(dst) and not overwrite:
+        if os.path.exists(dst) and not overwrite_static:
             continue
-        elif os.path.exists(dst) and overwrite:
+        elif os.path.exists(dst) and overwrite_static:
             os.remove(dst)
         if not copy_locally:
             log.info("Creating Symlink from %s to %s" % (src, dst))
@@ -986,23 +1094,62 @@ def collect_static_files(static_root=None, overwrite=True, copy_locally=False,
             log.info("Copying from %s to %s" % (src, dst))
             shutil.copy(src, dst)
             log.info("Applying '%s' umask to %s" % (file_umask, dst))
+            if type(file_umask) == str:
+                file_umask = int(file_umask, 8)
             os.chmod(dst, file_umask)
 
 
-if __name__ == '__main__':
-    # TODO: def standard argument parsers for flastik projects
-    # Command line arguments to parse per group:
-    #  - common: log_level, file_umask, dir_umask
-    #  - builder: url_root, templates, bootstrap_folder, css_style_sheet,
-    #             use_package_templates, favicon, meta, description=None, author=None
-    #  - builder.build: dest, views, overwrite, static_umask, html_umask, dir_umask
-    #  - collect_static_files: static_root, overwrite, copy_locally,
-    #                          file_umask, dir_umask
+def add_collect_static_files_arguments(arg_parser):
+    """
+    Adds all arguments related to the 'collect_static_files' function
+    to a given ArgumentParser instance
+    Returns an extended ArgumentParser instance
 
-    # TODO: def. different handler per log level (console + file or just file)
+    Args:
+        arg_parser: ArgumentParser instance
+
+    Returns: ArgumentParser instance
+    """
+    arg_parser.add_argument("--static_root", dest="static_root",
+                            type=str, nargs='?',
+                            help="""path to site root directory, str.""")
+    arg_parser.add_argument("--overwrite_static", dest="overwrite_static",
+                            type=bool, nargs='?', default=True,
+                            help="""If True (default): existing static files 
+                            will be overwritten.\nIf False: they won't""")
+    arg_parser.add_argument("--copy_locally", dest="copy_locally",
+                            type=bool, nargs='?', default=False,
+                            help="""If True: static files will copied locally.
+                            \nIf False (default): symlinks will be used instead""")
+    arg_parser.add_argument("--file_umask", dest="file_umask",
+                            type=str, nargs='?', default=0o644,
+                            help="""u-mask for files, Operating-system mode bitfield.
+                            \nDefault value = 0o644""")
+    arg_parser.add_argument("--folder_umask", dest="folder_umask",
+                            type=str, nargs='?', default=0o644,
+                            help="""u-mask for static folders, Operating-system mode bitfield.
+                            \nDefault value = 0o755""")
+    return arg_parser
+
+
+if __name__ == '__main__':
+    # Define Argument parser
+    arg_parser = ArgumentParser()
+    # - add Builder's arg
+    arg_parser = add_Builder_arguments(arg_parser)
+    # - add build's arg
+    arg_parser = add_build_arguments(arg_parser)
+    # - add collect_static_files' arg
+    arg_parser = add_collect_static_files_arguments(arg_parser)
+
+    # Parse commend line args.
+    arglist = sys.argv[1:]
+    options = vars(arg_parser.parse_args(args=arglist))
 
     # TODO: Turn into Test Unit
-    website = Builder(log_level='INFO')
+    # TODO: - make test based on the html so generated
+    # TODO: - make test on excepted static file locations
+    website = Builder(**options)
 
     img = Image("Default Icon",
                 os.path.join(website.package_path, "base_templates/default_icon.png"),
@@ -1039,7 +1186,6 @@ if __name__ == '__main__':
     @website.route("/<string:ship>/cruise/<int:cruise_id>/",
                    ship=ship_list, cruise_id=cruise_list)
     def cruise_report(ship, cruise_id):
-        0/0
         context['dwnld'] = ""
         context['title'] = "%s: Cruise %s" % (ship, cruise_id)
         # Testing "url_for" call from view
@@ -1059,9 +1205,5 @@ if __name__ == '__main__':
             folder_name, cruise_id, ship)
         return render_template('test.html', **context)
 
-    website.build()
-    collect_static_files()
-
-
-    # TODO: make test based on the html so generated
-    # TODO: make test on excepted static file locations
+    website.build(**options)
+    collect_static_files(**options)
