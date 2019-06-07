@@ -10,7 +10,6 @@ import sys
 import shutil
 import logging
 import itertools
-from argparse import ArgumentParser
 from functools import wraps
 from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 from jinja2 import select_autoescape
@@ -19,9 +18,6 @@ from uuid import uuid4
 # Standard logging
 log = logging.getLogger(__name__)
 
-# TODO: test units
-# TODO: dev. argparsers for Builder, and collect_static_files
-# TODO: replace flastic by FlasTik
 # TODO: redo README.pdf
 
 
@@ -55,7 +51,7 @@ class Builder:
                 If False: they won't.
 
             bootstrap_folder: path to bootstrap folder, str.
-                If None (default): a complete distribution of Bootstrap 2.3.2
+                If None (default): a complete distribution of Bootstrap 4.3.1
                     will be used and copied in static_website_root/static at
                     built/deployment
                 Otherwise: specified will be used and linked to
@@ -190,6 +186,7 @@ class Builder:
         Inspired by “@app.route” Flask decorator, @website.route decorator
         is an elegant way to specify which *.html file(s) will be created
         and where should it (they) go.
+        This decorator is designed to decorate "view" function.
 
             Note: see README.pdf provided in package for more details
 
@@ -369,7 +366,7 @@ class Builder:
         return relative_path
 
     def build(self, dest=None, views=[], overwrite=True,
-              static_umask=0o655, html_umask=0o644, dir_umask=0o751, **kwargs):
+              static_umask=0o655, html_umask=0o644, dir_umask=0o755, **kwargs):
         """
         Build and deploy the static website project, that is:
          - Make web site folder tree (to destination if specified)
@@ -395,13 +392,22 @@ class Builder:
                 Default value: 0o644, Operating-system mode bitfield.
 
             dir_umask: U-mask for directories, U-mask code
-                Default value: 0o751, Operating-system mode bitfield.
+                Default value: 0o755, Operating-system mode bitfield.
         """
         # New attributes...not compliant with PEP but whatever
         self.overwrite = overwrite
+        if type(static_umask) == str:
+            log.debug("static_umask as str: %s" % static_umask)
+            static_umask = int(static_umask, 8)
         self.static_umask = static_umask
-        self.html_umask = html_umask
+        if type(dir_umask) == str:
+            log.debug("dir_umask as str: %s" % dir_umask)
+            dir_umask = int(dir_umask, 8)
         self.dir_umask = dir_umask
+        if type(html_umask) == str:
+            log.debug("html_umask as str: %s" % html_umask)
+            html_umask = int(html_umask, 8)
+        self.html_umask = html_umask
         # Sanity checks
         if dest is None:
             self.dest = os.path.join(os.getcwd(), 'build')
@@ -701,8 +707,6 @@ class Builder:
         with open(html_path, "w") as f:
             f.write(rendered_html)
         #  * change permission
-        if type(self.html_umask) == str:
-            self.html_umask = int(self.html_umask, 8)
         os.chmod(html_path, self.html_umask)
 
 
@@ -734,10 +738,6 @@ def apply_umasks(path, dir_umask, file_umask):
         dir_umask: directory umask, Operating-system mode bitfield
         file_umask: file umask, Operating-system mode bitfield
     """
-    if type(dir_umask) == str:
-        dir_umask = int(dir_umask, 8)
-    if type(file_umask) == str:
-        file_umask = int(file_umask, 8)
     for root, dirs, files in os.walk(path):
         os.chmod(root, dir_umask)
         for d in dirs:
@@ -775,7 +775,7 @@ def add_Builder_arguments(arg_parser):
     arg_parser.add_argument("--bootstrap_folder", dest="bootstrap_folder",
                             type=str, nargs='?',
                             help="""path to bootstrap folder, str.
-                If None (default): a complete distribution of Bootstrap 2.3.2
+                If None (default): a complete distribution of Bootstrap 4.3.1
                     will be used and copied in static_website_root/static at
                     built/deployment
                 Otherwise: specified will be used and linked to""")
@@ -832,9 +832,9 @@ def add_build_arguments(arg_parser):
                             help="""U-mask for *.html files, U-mask code
                 Default value: 0o644, Operating-system mode bitfield.""")
     arg_parser.add_argument("--dir_umask", dest="dir_umask",
-                            type=str, nargs='?', default=0o751,
+                            type=str, nargs='?', default=0o755,
                             help="""U-mask for directories, U-mask code
-                Default value: 0o751, Operating-system mode bitfield.""")
+                Default value: 0o755, Operating-system mode bitfield.""")
     return arg_parser
 
 
@@ -1049,13 +1049,20 @@ def collect_static_files(static_root=None, overwrite_static=True, copy_locally=F
         file_umask: u-mask for files, Operating-system mode bitfield.
         folder_umask: u-mask for static folders, Operating-system mode bitfield.
     """
+    # Sanity check
+    if type(file_umask) == str:
+        log.debug("file_umask as str: %s" % file_umask)
+        file_umask = int(file_umask, 8)
+    if type(folder_umask) == str:
+        log.debug("folder_umask as str: %s" % folder_umask)
+        folder_umask = int(folder_umask, 8)
+
     # Fetch existing Builder instance
     if not Builder.instance and not static_root:
         msg = """"
         In order to use this function, one needs to either create a 
         flastik.Builder instance beforehand or specify a deployment 
         destination via the 'dest' option."""
-        # TODO: log.error first...everywhere
         log.error(msg)
         raise Exception(msg)
     elif not static_root:  # Note: user specified dest takes over
@@ -1074,8 +1081,6 @@ def collect_static_files(static_root=None, overwrite_static=True, copy_locally=F
         dst = os.path.join(static_root, tp, dst)
         dir_name = os.path.dirname(dst)
         if dir_name and not os.path.exists(dir_name):
-            if type(folder_umask) == str:
-                folder_umask = int(folder_umask, 8)
             os.makedirs(dir_name, folder_umask)
     # - Make symlink to (or copy) source files in their dest. location
     #     Note: symlinks require a certain server/file system set-up
@@ -1090,8 +1095,6 @@ def collect_static_files(static_root=None, overwrite_static=True, copy_locally=F
             log.info("Copying from %s to %s" % (src, dst))
             shutil.copy(src, dst)
             log.info("Applying '%s' umask to %s" % (file_umask, dst))
-            if type(file_umask) == str:
-                file_umask = int(file_umask, 8)
             os.chmod(dst, file_umask)
 
 
@@ -1122,7 +1125,7 @@ def add_collect_static_files_arguments(arg_parser):
                             help="""u-mask for files, Operating-system mode bitfield.
                             \nDefault value = 0o644""")
     arg_parser.add_argument("--folder_umask", dest="folder_umask",
-                            type=str, nargs='?', default=0o644,
+                            type=str, nargs='?', default=0o755,
                             help="""u-mask for static folders, Operating-system mode bitfield.
                             \nDefault value = 0o755""")
     return arg_parser

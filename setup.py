@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# TODO: define copyright/license
 """
 Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019. See LICENSE for details.
