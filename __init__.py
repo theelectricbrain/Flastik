@@ -202,8 +202,9 @@ class Builder:
 
         Keyword Args:
             _func: wrapped python func
-            **kwargs_deco: list(s) of values or list(s) of lists corresponding
-                to the variable(s) specified in the Route Pattern
+            **kwargs_deco: list(s) of values or dict(s) of lists with keys
+                corresponding to the previous variable(s) specified in the
+                Route Pattern
         """
         # Note: boiler plate inspired by
         #       https://realpython.com/primer-on-python-decorators/#more-real-world-examples
@@ -555,7 +556,7 @@ class Builder:
         if len(types) is not 1:
             msg = """
             Error type in %s list.
-            Only list of uniform values or list of lists are supported.\n
+            Only list of uniform values are supported.\n
             E.g. route: %s; types: %s""" % (
                 var_name, route, [str(type(vv)) for vv in var_val])
             log.error(msg)
@@ -617,22 +618,22 @@ class Builder:
         # Checking list of values and list of lists
         for group in found:
             values = kwargs_deco[group[1]]
-            # - check if first container is a list
-            if not isinstance(values, list):
-                msg = "Error type: %s variable must be a list" % group[1]
+            # - sanity check if first container is a list or dict
+            if not isinstance(values, (list, dict)):
+                msg = "Error type: %s variable must be a list or a dict." % group[1]
                 log.error(msg)
                 raise Exception(msg)
             var_type = group[0]
             var_name = group[1]
-            # - check if dealing with a list of lists
-            if all(isinstance(n, list) for n in values):
+            # - check if dealing with a dict of lists
+            if isinstance(values, dict):
                 all_strings = False
-                clean_list = []
-                self.check_vars_vs_type(var_type, var_name, values, route)
-                for ll in values:
+                clean_dict = {}
+                for key in values.keys():
+                    ll = values[key]
                     var_val = self.check_vars_vs_type(var_type, var_name, ll, route)
-                    clean_list.append(var_val)
-                var_lists.append(clean_list)
+                    clean_dict[key] = var_val
+                var_lists.append(clean_dict)
             else:
                 var_val = self.check_vars_vs_type(var_type, var_name, values, route)
                 var_lists.append(var_val)
@@ -643,49 +644,46 @@ class Builder:
             route_vars = list(itertools.product(*var_lists))
         # - otherwise
         else:
+            required_keys = []
             for l, group in zip(var_lists, found):
                 var_name = group[1]
                 #  * first time around
                 if not route_vars:
-                    if all(isinstance(vv, list) for vv in l):  # List of list
-                        for lv in l:
-                            route_vars.extend([[vv] for vv in lv])
+                    if isinstance(l, dict):  # Dict of list
+                        msg = "'%s' dict requires %s to be defined just before in the url." % (
+                            var_name, l.keys())
+                        log.error(msg)
+                        raise Exception(msg)
                     else:  # List of values
                         route_vars = [[vv] for vv in l]
-                    required_length = len(route_vars)
+                    required_keys = l
                 #  * next time around
                 else:
-                    # FIXME: Not sure which behavior is the best, either:
-                    #         - always match the number routes made so far
-                    #         - or to the length of last list of value
-                    #         - or combination...!?
-                    #        There are no good or bad answer here yet it would
-                    #        fundamentally change the behavior here.
-                    #         See 'Scheme#'
                     old_route_vars = route_vars.copy()
                     route_vars = []
-                    if all(isinstance(vv, list) for vv in l):  # List of list
-                        if len(l) is not required_length:  # Sanity check
-                            msg = "'%s' requires %s lists." % (var_name, required_length)
+                    if isinstance(l, dict):  # Dict of list
+                        # Dict keys must match previous ramification
+                        if not set(l.keys()) == set(required_keys):  # Sanity check
+                            msg = "'%s' dict. requires %s as keys and not %s." % (
+                                var_name, required_keys, l.keys())
                             log.error(msg)
                             raise Exception(msg)
-                        for rr, lv in zip(old_route_vars, l):
+                        for rr in old_route_vars:
+                            lv = l[rr[-1]]
                             for vv in lv:
                                 route_vars.append(rr + [vv])
-                        # Scheme1 - depending on previous:
-                        # - Requirement based on "number routes made so far"
-                        # required_length = len(route_vars)
+                        # - resets requirement
+                        required_keys = []
                     else:  # List of values
                         for rr in old_route_vars:
                             for vv in l:
                                 route_vars.append(rr + [vv])
-                        # Scheme1 - depending on previous:
-                        # - Requirement based on "number values in list"
-                        # required_length = len(l)
-                    # Scheme2 - always match number of existing routes:
-                    required_length = len(route_vars)
+                        # - defines ramification requirement for dict.
+                        required_keys = l
+                print("route_vars: ", route_vars)
             #  * turn inside lists into tuples
             route_vars = [tuple(lv) for lv in route_vars]
+
         return route_vars
 
     def _write_html_file(self, html_name, route, rendered_html):

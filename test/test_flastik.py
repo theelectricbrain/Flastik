@@ -29,7 +29,7 @@ context = {
 }
 
 ship_list = ["Shippy-MacShipface", "Boatty-MacBoatface"]
-cruise_list = [[1, 2], [99, 98, 97]]
+cruise_dict = {"Shippy-MacShipface": [1, 2], "Boatty-MacBoatface": [99, 98, 97]}
 
 # Testing benchmarks
 hello_world_str = """<!DOCTYPE html>
@@ -295,13 +295,13 @@ def test_build():
         context['title'] = "Hello World !"
         context['body_text'] = '<h2>Hello World !</h2>'
         pattern = "\n<br><a href='%s/cruise/%s/report/index.html'>%s: report for cruise %s</a>"
-        for ship, cruises in zip(ship_list, cruise_list):
+        for ship in ship_list:
+            cruises = cruise_dict[ship]
             for cruise_id in cruises:
                 context['body_text'] += pattern % (ship, cruise_id, ship, cruise_id)
         return render_template('test.html', **context)
 
-    @website.route("/<string:ship>/cruise/<int:cruise_id>/",
-                   ship=ship_list, cruise_id=cruise_list)
+    @website.route("/<string:ship>/cruise/<int:cruise_id>/", ship=ship_list, cruise_id=cruise_dict)
     def cruise_report(ship, cruise_id):
         context['dwnld'] = ""
         context['title'] = "%s: Cruise %s" % (ship, cruise_id)
@@ -310,9 +310,8 @@ def test_build():
         context['body_text'] = '<h2>This cruise %s. Hail to the %s !</h2>' % (cruise_id, ship)
         return render_template('test.html', **context)
 
-
     @website.route("/<string:ship>/cruise/<int:cruise_id>/<string:folder_name>/",
-                   ship=ship_list, cruise_id=cruise_list, folder_name=['data', 'report'])
+                   ship=ship_list, cruise_id=cruise_dict, folder_name=['data', 'report'])
     def cruise_n_data(ship, cruise_id, folder_name):
         context['dwnld'] = ""
         context['title'] = "%s - %s" % (folder_name, ship)
@@ -335,14 +334,16 @@ def test_hello_world():
 
 def test_cruise_report():
     with open(os.path.join(
-            dest, ship_list[0], "cruise", str(cruise_list[0][0]), "index.html"), "r") as f:
+            dest, ship_list[0], "cruise", str(cruise_dict[ship_list[0]][0]),
+            "index.html"), "r") as f:
         cruise_html = f.read()
     assert(cruise_html == cruise_str)
 
 
 def test_cruise_n_data():
     with open(os.path.join(
-            dest, ship_list[0], "cruise", str(cruise_list[0][0]), "data", "index.html"
+            dest, ship_list[0], "cruise", str(cruise_dict[ship_list[0]][0]),
+            "data", "index.html"
     ), "r") as f:
         cruise_n_data_html = f.read()
     assert(cruise_n_data_html == cruise_n_data_str)
