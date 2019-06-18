@@ -680,7 +680,6 @@ class Builder:
                                 route_vars.append(rr + [vv])
                         # - defines ramification requirement for dict.
                         required_keys = l
-                print("route_vars: ", route_vars)
             #  * turn inside lists into tuples
             route_vars = [tuple(lv) for lv in route_vars]
 

@@ -51,3 +51,10 @@
    margin-top: 20px;
    padding: 10px 0;
 }
+
+/*! So that body starts under the navbar */
+body {
+  margin: 10px;
+  min-height: 75rem;
+  padding-top: 4.5rem;
+}
