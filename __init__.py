@@ -13,12 +13,15 @@ import itertools
 from functools import wraps
 from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 from jinja2 import select_autoescape
+from docutils.core import publish_parts
 from uuid import uuid4
 
 # Standard logging
 log = logging.getLogger(__name__)
 
-# TODO: redo README.pdf
+# TODO: redo README.pdf including rst2html
+# TODO: create line command: flastik create_project NAME => creates standard project structure
+# TODO: create line command: flastik create_doc => create website with documentation
 
 
 class Builder:
@@ -248,14 +251,15 @@ class Builder:
         route_vars = []
         if found:
             route_vars = self._generate_route_vars(found, kwargs_deco, route)
-            log.debug("Route: %s; Vars.: %s" % (route_pattern, route_vars))
+            log.debug("Route: %s ; Vars.: %s" % (route_pattern, route_vars))
         # - check if routes already in use, if not store them
         for vv in route_vars:
-            new_route = route_pattern % vv
+            new_pattern = route_pattern % vv
+            new_route = os.path.join(new_pattern, html_name)
             log.debug(new_route)
             # - check if route is url and system file friendly
-            check_url_for_unsafe_characters(new_route)
-            check_path_for_illegal_characters(new_route)
+            check_url_for_unsafe_characters(new_pattern)
+            check_path_for_illegal_characters(new_pattern)
             if new_route not in self.routes:
                 self.routes.append(new_route)
                 log.info("New route: %s" % new_route)
@@ -297,7 +301,7 @@ class Builder:
 
             # Store function in Builder
             if func.__name__ in self.web_pages.keys():
-                msg = "'%s' is already used for another view " % func.__name__
+                msg = "'%s' is already used for another view function" % func.__name__
                 log.error(msg)
                 raise Exception(msg)
             self.web_pages[func.__name__] = {
@@ -565,29 +569,30 @@ class Builder:
         if list not in types:
             if var_type == "string" and not all(isinstance(n, str) for n in var_val):
                 msg = "Error type in %s values. 'string' type only valid for "
-                msg += "list of str.\nE.g. route: %s" % (var_name, route)
+                msg += "list of str.\nE.g. Var.: %s ; route: %s" % (var_name, route)
                 log.error(msg)
                 raise Exception(msg)
             elif var_type == "int" and not all(isinstance(n, int) for n in var_val):
                 msg = "Error type in %s values. 'int' type only valid for list of int."
-                msg += "\nE.g. route: %s" % (var_name, route)
+                msg += "\nE.g. Var.: %s ; route: %s" % (var_name, route)
                 log.error(msg)
                 raise Exception(msg)
             elif var_type == "float" and not all(isinstance(n, float) for n in var_val):
                 msg = "Error type in %s values. 'float' type only valid for list of floats."
-                msg += "\nE.g. route: %s" % (var_name, route)
+                msg += "\nE.g. Var.: %s ; route: %s" % (var_name, route)
                 log.error(msg)
                 raise Exception(msg)
             # FIXME: not sure if I need that check !?
             elif var_type == "path" and not all(os.path.exists(n) for n in var_val):
                 msg = "Error in %s values. Some of those paths do not exist."
-                msg += "\nE.g. route: %s" % (var_name, route)
+                msg += "\nE.g. Var.: %s ; route: %s" % (var_name, route)
                 log.error(msg)
                 raise Exception(msg)
             elif var_type not in ["string", "int", "float", "path"]:
                 msg = "'%s' type in %s is not supported. "
                 msg += "Available types: string, int, float, path. "
-                msg += "\nE.g. route: %s" % (var_type, var_name, route)
+                msg += "\nE.g. Var. Type: %s ; Var.: %s ; route: %s" % (
+                    var_type, var_name, route)
                 log.error(msg)
                 raise Exception(msg)
             else:
@@ -835,6 +840,40 @@ def add_build_arguments(arg_parser):
     return arg_parser
 
 
+def rst2html(rst_file, **context):
+    """
+    Converts RestructuredText templates to HTML. Note that the template can
+    include Jinja variables and logic.
+
+    Args:
+        rst_file: name of the *.rst template, str.
+        **context: dictionary of contextual information, dict.
+
+    Returns: rendered HTML, str.
+
+    """
+    with open(rst_file, 'r') as f:
+        rst_string = f.read()
+    # Convert rst to html5
+    html_string = publish_parts(rst_string, writer_name="html5")['html_body']
+    # Restore Jinja injections
+    html_string = html_string.replace("<p>{{", "{{").replace("}}</p>", "}}")
+    html_string = html_string.replace("<p>{%", "{%").replace("%}</p>", "%}")
+    # Use Jinja variables and logics
+    # Fetch existing Builder instance
+    if not Builder.instance:
+        msg = """"
+            A flastik.Builder instance must be created beforehand in order to use 
+            'render_template'."""
+        log.error(msg)
+        raise Exception(msg)
+    else:
+        jinja_env = Builder.instance[0].jinja_env
+    str_template = jinja_env.from_string(html_string)
+
+    return str_template.render(**context)
+
+
 # Flask-lookalikes Library
 def render_template(template_name, **context):
     """
@@ -858,7 +897,6 @@ def render_template(template_name, **context):
     # Get template through jinja template env/loader
     template = jinja_env.get_template(template_name)
     return template.render(**context)
-    # print(template.render(**context))
 
 
 # Library for "static files"...as in other files than html and bootstrap related
@@ -990,7 +1028,7 @@ class Image(StaticFile):
     @property
     def html_image(self):
         """Returns html formatted image block"""
-        img = '<img src="%s" alt="%s">' % (self.url, self.name)
+        img = '<img src="%s" class="img-fluid" alt="%s">' % (self.url, self.name)
         return img
     # TODO: add similar templating methods specific to images below
 

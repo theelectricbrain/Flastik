@@ -38,6 +38,6 @@ setup(name='Flastik',
           'bootstrap/popper/*',
           'bootstrap/jquery/*',
           'bootstrap/js/*', ]},
-      install_requires=['jinja2'],
+      install_requires=['jinja2', 'docutils'],
       cmdclass={'test': TestCommand}
       )

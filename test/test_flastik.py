@@ -87,7 +87,7 @@ hello_world_str = """<!DOCTYPE html>
 <br><a href='Boatty-MacBoatface/cruise/98/report/index.html'>Boatty-MacBoatface: report for cruise 98</a>
 <br><a href='Boatty-MacBoatface/cruise/97/report/index.html'>Boatty-MacBoatface: report for cruise 97</a>
     <br><h3><a href='downloads/README.pdf' download>README</a></h3>
-    <br><h3>Default Icon: </h3><img src="images/test/something_else.png" alt="Default Icon">
+    <br><h3>Default Icon: </h3><img src="images/test/something_else.png" class="img-fluid" alt="Default Icon">
     <br><h3>Testing url_for from Template: "Home" = hello_world.html</h3>
     <br>
     <h3>
@@ -162,7 +162,7 @@ cruise_str = """<!DOCTYPE html>
 
     <h2>This cruise 1. Hail to the Shippy-MacShipface !</h2>
     
-    <br><h3>Default Icon: </h3><img src="../../../images/test/something_else.png" alt="Default Icon">
+    <br><h3>Default Icon: </h3><img src="../../../images/test/something_else.png" class="img-fluid" alt="Default Icon">
     <br><h3>Testing url_for from Template: "Home" = ../../../hello_world.html</h3>
     <br>
     <h3>
@@ -238,7 +238,7 @@ cruise_n_data_str = """<!DOCTYPE html>
 
     <h2>Welcome to the data folder for the 1 cruise of the Shippy-MacShipface</h2>
     
-    <br><h3>Default Icon: </h3><img src="../../../../images/test/something_else.png" alt="Default Icon">
+    <br><h3>Default Icon: </h3><img src="../../../../images/test/something_else.png" class="img-fluid" alt="Default Icon">
     <br><h3>Testing url_for from Template: "Home" = ../../../../hello_world.html</h3>
     <br>
     <h3>
