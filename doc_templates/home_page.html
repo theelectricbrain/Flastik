@@ -10,7 +10,9 @@
         <img src="{{ url_for('static', filename='favicon.ico') }}" width="300" height="300" alt="Flastik">
     </div>
     <p>{{ intro }}</p>
-    <p>For more details about Flastik's specification, syntax and patterns, please {{ readme.html_download }}.</p>
+    <p>For more details about Flastik's specifications, syntax and patterns, please {{ readme.html_download }}.</p>
+    <p>Flastik is distributed under the {{ license.html_download }}.</p>
+
 </div>
 {% include "footer.html" %}
 {% endblock %}

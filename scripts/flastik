@@ -116,6 +116,8 @@ def build_doc(doc_path):
         context['sub_title'] = "A tiny-framework for static website design"
         context['readme'] = flastik.Download(
             "Read Me", os.path.join(website.package_path, "README.pdf"))
+        context['license'] = flastik.Download(
+            "GNU GPL Version 3 License", os.path.join(website.package_path, "LICENSE.txt"))
         context['intro'] = (
             "Flastik is a tiny-framework for static website design inspired "
             "by Flask micro-framework. "
