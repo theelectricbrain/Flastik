@@ -27,8 +27,6 @@ from uuid import uuid4
 # Standard logging
 log = logging.getLogger(__name__)
 
-# TODO: redo README.pdf including rst2html
-
 
 class Builder:
     # Tracking page being rendered

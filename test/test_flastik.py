@@ -9,7 +9,7 @@ import sys
 from argparse import ArgumentParser
 from glob import glob
 # Templating imports
-from flastik import Builder, render_template
+from flastik import Builder, render_template, rst2html
 # Static files imports
 from flastik import Image, Download, collect_static_files
 # Argument parsers imports
