@@ -101,7 +101,7 @@ hello_world_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div class="col-md-2"><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
     </div>
 </div>
 
@@ -179,7 +179,7 @@ cruise_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div class="col-md-2"><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
     </div>
 </div>
 
@@ -258,7 +258,7 @@ cruise_n_data_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div class="col-md-2"><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
     </div>
 </div>
 

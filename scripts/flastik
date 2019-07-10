@@ -41,7 +41,12 @@ def main(args=None):
 
 
 def build_project_folder(project_path):
-    # TODO
+    """
+    Builds a start-up Flastik project folder
+
+    Args:
+        project_path: path to Flastik project folder to be built, str.
+    """
     log.debug("project_path: %s", project_path)
     os.makedirs(project_path)
     # Copy templates
@@ -51,13 +56,25 @@ def build_project_folder(project_path):
     dest = os.path.join(project_path, 'base_templates')
     shutil.copytree(orig, dest)
     # Create builder script from template
-    file_name = os.path.basename(project_path) + ".py"
+    basename = os.path.basename(project_path)
+    file_name = basename + ".py"
     with open(os.path.join(project_path, file_name), 'w') as f:
         f.write(builder_template)
+    # Communicate with user
+    msg = ("Your %s's project folder has been built.\n"
+           "Change directory to %s and run 'python %s -h' to check the "
+           "available options for building/deploying your webiste.") % (
+        basename, project_path, file_name)
+    print(msg)
 
 
 def build_doc(doc_path):
-    # TODO
+    """
+    Creates a static website for the Flastik documentation.
+
+    Args:
+        doc_path: path to Flastik's documentation website to be built, str.
+    """
     log.debug("doc_path: %s", doc_path)
     os.makedirs(doc_path)
     # Crawling Package for docstrings
@@ -67,7 +84,6 @@ def build_doc(doc_path):
     for f in [ii for ii in getmembers(flastik, isfunction) if 'flastik' is ii[1].__module__]:
         if f[1].__doc__:
             functions[f[0]] = f[1].__doc__.replace("<", "&lt;").replace(">", "&gt;")
-
     classes = {}
     for c in [ii for ii in getmembers(flastik, isclass) if 'flastik' is ii[1].__module__]:
         classes[c[0]] = {'doc': None}
@@ -84,20 +100,14 @@ def build_doc(doc_path):
         classes[c[0]]['properties'] = {}
         for p in getmembers(c[1], lambda o: isinstance(o, property)):
             classes[c[0]]['properties'][p[0]] = p[1].__doc__.replace("<", "&lt;").replace(">", "&gt;")
-
-
-
-    # TODO: views: home, class_list, class, function_list,
-    #  function
+    # Instantiating Builder
     website = flastik.Builder(templates=os.path.join(package_path, 'doc_templates'))
-
-    # Common context
+    # Defining some common context
     context = {
         'project_name': 'Flastik',
         'project_url': "https://github.com/theelectricbrain",
-        'footer_link': {'name': 'Flastik - Copyright 2019', 'url': 'https://github.com/theelectricbrain'},
+        'footer_link': {'name': 'Powered by Flastik - Copyright 2019', 'url': 'https://github.com/theelectricbrain'},
     }
-
     # Views
     @website.route("/flastik.html")
     def home_page():
@@ -108,16 +118,13 @@ def build_doc(doc_path):
             "Read Me", os.path.join(website.package_path, "README.pdf"))
         context['intro'] = (
             "Flastik is a tiny-framework for static website design inspired "
-            "by Flask micro-framework (see http://flask.pocoo.org/docs/1.0/). "
+            "by Flask micro-framework. "
             "It provides tools for designing simple static website project "
             "using Flask-like syntax and project architecture as well as "
             "leveraging Jinja2 templating system and Bootstrap 'beautyfying' "
-            "capability. Additionally, Flastik aims to easy the porting to "
+            "capability. Additionally, Flastik aims to ease the porting to "
             "Flask if extra functionality becomes needed further down your "
-            "website life cycle. Basic knowledge of Jinja2 templating and "
-            "Flask1.0 microwebframework will be assumed from here on "
-            "(see http://flask.pocoo.org/docs/1.0/ and "
-            "http://jinja.pocoo.org/docs/2.10/). <br><br>In addition classes "
+            "website life cycle. <br><br>In addition, classes "
             "and functions have been designed in order to ease the management "
             "and templating of images, downloads and other static files "
             "(see StaticFile, Image and Download classes as well as "
@@ -135,12 +142,17 @@ def build_doc(doc_path):
         context['title'] = "Flastik's Functions"
         context['functions'] = functions
         return flastik.render_template("functions_page.html", **context)
-
-
+    # Building website and collecting statics
     website.build(dest=doc_path)
-    # collect_static_files()
+    flastik.collect_static_files()
+    # Communicate with user
+    msg = ("Flastik's documentation website has been built.\n"
+           "Change directory to %s and open flastik.html with your favorite "
+           "web browser.") % doc_path
+    print(msg)
 
 
+# Local lib.
 builder_template = """
 import os
 import shutil
@@ -170,7 +182,7 @@ if __name__ == "__main__":
     options = vars(arg_parser.parse_args(args=arglist))
 
     # Initiate Builder
-    website = Builder()
+    website = Builder(**options)
 
     # Common context
     context = dict(
@@ -204,8 +216,9 @@ if __name__ == "__main__":
         return render_template('hello_world.html', **context)
 
 
-    website.build()
-    collect_static_files()       
+    # Building Website and collecting statics
+    website.build(**options)
+    collect_static_files(**options)       
 """
 
 if __name__ == "__main__":

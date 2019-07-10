@@ -851,15 +851,17 @@ def add_build_arguments(arg_parser):
 
 def rst2html(rst_file, **context):
     """
-    Converts RestructuredText templates to HTML. Note that the template can
-    include Jinja variables and logic.
+    Converts RestructuredText templates to HTML.
+
+    Note: the RST template can include all Jinja variables and logic
+          except for {% include ... %} and {% extends ... %} tags
+          (To be developed in the next version of Flastik)
 
     Args:
         rst_file: name of the *.rst template, str.
         **context: dictionary of contextual information, dict.
 
     Returns: rendered HTML, str.
-
     """
     with open(rst_file, 'r') as f:
         rst_string = f.read()

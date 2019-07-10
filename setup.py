@@ -25,26 +25,14 @@ class TestCommand(Command):
         pytest.main(["./"])
 
 
-class CustomInstallCommand(install):
-    """Customized setuptools install command - prints a friendly greeting."""
-    def run(self):
-        install.run(self)
-        # Installing scripts manually
-        bin_path = os.path.dirname(sys.executable)
-        dest = os.path.join(bin_path, 'flastik')
-        shutil.copy('./scripts/command_line.py', dest)
-        os.chmod(dest, 0o0777)
-
-
 setup(name='Flastik',
       version='1.0',
       description='A Flask-like Tiny-framework for static websites',
       author='Dr. Thomas Roc',
       author_email='info@electricbrain.fr',
       license='GNU GPLv3',
-      # url='https://www.python.org/sigs/distutils-sig/',
-      packages=['flastik', 'flastik.scripts'],
-      package_dir={'flastik': '', 'flastik.scripts': 'scripts'},
+      packages=['flastik'],
+      package_dir={'flastik': '', },
       package_data={'flastik': [
           'README.pdf',
           'LICENSE.txt',
@@ -55,12 +43,8 @@ setup(name='Flastik',
           'bootstrap/jquery/*',
           'bootstrap/js/*', ]},
       install_requires=['jinja2', 'docutils'],
-      cmdclass={'test': TestCommand, 'install': CustomInstallCommand},
-      # FIXME: I cannot get this one to work !!!
-      # entry_points={
-      #     'console_scripts': ['flastik = flastik.scripts:command_line']
-      # },
-      # scripts=['scripts/command_line.py']
+      cmdclass={'test': TestCommand},
+      scripts=['scripts/flastik']
       )
 
 
