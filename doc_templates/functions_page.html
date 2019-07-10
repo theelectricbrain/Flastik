@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+{% include "navbar.html" %}
+<div class="container">
+    <h1 class="display-3">Functions Description</h1>
+    {% for key in functions.keys() %}
+    <h2>{{ key }}</h2>
+    {% if functions[key] %}
+    <pre>{{ functions[key]|safe }}</pre>
+    {% endif %}
+    {% endfor %}
+</div>
+{% include "footer.html" %}
+{% endblock %}

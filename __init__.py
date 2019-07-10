@@ -4,6 +4,14 @@ Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019. See LICENSE for details.
 """
 
+#Meta
+__version__ = '1.0'
+__description__ = 'A Flask-like Tiny-framework for static websites'
+__author__ = 'Dr. Thomas Roc'
+__author_email__ = 'info@electricbrain.fr'
+__license__ = 'GNU GPLv3'
+
+# Imports
 import os
 import re
 import sys
@@ -20,8 +28,6 @@ from uuid import uuid4
 log = logging.getLogger(__name__)
 
 # TODO: redo README.pdf including rst2html
-# TODO: create line command: flastik create_project NAME => creates standard project structure
-# TODO: create line command: flastik create_doc => create website with documentation
 
 
 class Builder:
@@ -94,7 +100,6 @@ class Builder:
         if log.level <= 20:
             log.addHandler(logging.StreamHandler(sys.stdout))
         log_handler.setFormatter(log_format)
-
         # - Check: only one instance per project
         if not self.instance:
             self.instance.append(self)
@@ -1028,7 +1033,9 @@ class Image(StaticFile):
 
     @property
     def html_image(self):
-        """Returns html formatted image block"""
+        """
+        Returns html formatted image block
+        """
         img = '<img src="%s" class="img-fluid" alt="%s">' % (self.url, self.name)
         return img
     # TODO: add similar templating methods specific to images below
@@ -1062,7 +1069,9 @@ class Download(StaticFile):
 
     @property
     def html_download(self):
-        """Returns html formatted downloadable block"""
+        """
+        Returns html formatted downloadable block
+        """
         d_link = "<a href='%s' download>%s</a>" % (self.url, self.name)
         return d_link
     # TODO: add similar templating methods specific to downloads below

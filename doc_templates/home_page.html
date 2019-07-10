@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+{% include "navbar.html" %}
+<div class="container">
+    <div style="text-align: center;">
+        <h1 class="display-1">{{ title_text }}</h1>
+        <h4><i>{{ sub_title }}</i></h4>
+        <img src="{{ url_for('static', filename='favicon.ico') }}" width="300" height="300" alt="Flastik">
+    </div>
+    <p>{{ intro }}</p>
+    <p>For more details about Flastik's specification, syntax and patterns, please {{ readme.html_download }}.</p>
+</div>
+{% include "footer.html" %}
+{% endblock %}
+
+
+

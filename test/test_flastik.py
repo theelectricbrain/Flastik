@@ -23,9 +23,9 @@ context = {
     'project_name': 'project_name',
     'navbar_links': [
         {'name': 'home', 'url': "?"},
-        {'name': 'test', 'url': 'https://www.surfline.com'},
+        {'name': 'test', 'url': 'https://github.com/theelectricbrain'},
     ],
-    'footer_link': {'name': 'Flastik - Copyright 2019', 'url': 'https://www.surfline.com'},
+    'footer_link': {'name': 'Flastik - Copyright 2019', 'url': 'https://github.com/theelectricbrain'},
 }
 
 ship_list = ["Shippy-MacShipface", "Boatty-MacBoatface"]
@@ -57,7 +57,10 @@ hello_world_str = """<!DOCTYPE html>
 <!-- Navigation -->
 
 <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">project_name</a>
+  <a class="navbar-brand" href="#">
+    <img src="static/favicon.ico" width="30" height="30" alt="">
+    project_name
+  </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -71,7 +74,7 @@ hello_world_str = """<!DOCTYPE html>
       </li>
       
       <li class="nav-item active">
-        <a class="nav-link" href="https://www.surfline.com">test</a>
+        <a class="nav-link" href="https://github.com/theelectricbrain">test</a>
       </li>
       
 
@@ -98,7 +101,7 @@ hello_world_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div class="col-md-2"><a href="https://www.surfline.com">Flastik - Copyright 2019</a></div>
+        <div class="col-md-2"><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
     </div>
 </div>
 
@@ -137,7 +140,10 @@ cruise_str = """<!DOCTYPE html>
 <!-- Navigation -->
 
 <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">project_name</a>
+  <a class="navbar-brand" href="#">
+    <img src="../../../static/favicon.ico" width="30" height="30" alt="">
+    project_name
+  </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -151,7 +157,7 @@ cruise_str = """<!DOCTYPE html>
       </li>
       
       <li class="nav-item active">
-        <a class="nav-link" href="https://www.surfline.com">test</a>
+        <a class="nav-link" href="https://github.com/theelectricbrain">test</a>
       </li>
       
 
@@ -173,7 +179,7 @@ cruise_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div class="col-md-2"><a href="https://www.surfline.com">Flastik - Copyright 2019</a></div>
+        <div class="col-md-2"><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
     </div>
 </div>
 
@@ -213,7 +219,10 @@ cruise_n_data_str = """<!DOCTYPE html>
 <!-- Navigation -->
 
 <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">project_name</a>
+  <a class="navbar-brand" href="#">
+    <img src="../../../../static/favicon.ico" width="30" height="30" alt="">
+    project_name
+  </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -227,7 +236,7 @@ cruise_n_data_str = """<!DOCTYPE html>
       </li>
       
       <li class="nav-item active">
-        <a class="nav-link" href="https://www.surfline.com">test</a>
+        <a class="nav-link" href="https://github.com/theelectricbrain">test</a>
       </li>
       
 
@@ -249,7 +258,7 @@ cruise_n_data_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div class="col-md-2"><a href="https://www.surfline.com">Flastik - Copyright 2019</a></div>
+        <div class="col-md-2"><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
     </div>
 </div>
 
@@ -266,6 +275,7 @@ cruise_n_data_str = """<!DOCTYPE html>
 
 # Building test web site
 def test_build():
+    # TODO: add test for rst2html
     # Define Argument parser
     arg_parser = ArgumentParser()
     # - add Builder's arg

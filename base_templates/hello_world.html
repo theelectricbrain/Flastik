@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+{% include "navbar.html" %}
+<div class="container" style="text-align: center;">
+    <h1 class="display-1">{{ body_text }}</h1>
+    <img src="{{ url_for('static', filename='favicon.ico') }}" width="300" height="300" alt="Flastik">
+    {% if dwnld %}<br><h3>{{ dwnld.html_download }}</h3>{% endif %}
+</div>
+{% include "footer.html" %}
+{% endblock %}
+
+
+

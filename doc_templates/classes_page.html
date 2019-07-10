@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+{% include "navbar.html" %}
+<div class="container">
+    <h1 class="display-3">Classes Description</h1>
+    {% for key in classes.keys() %}
+    <h2 style="margin-left: 50px">{{ key }} Class</h2>
+    {% if classes[key]['doc'] %}
+    <pre>{{ classes[key]['doc']|safe }}</pre>
+    {% endif %}
+    {% if classes[key]['methods'] %}
+    <h3 style="margin-left: 80px">{{ key }}'s Methods</h3>
+        {% for method, doc in classes[key]['methods'].items() %}
+        <h4 style="margin-left: 100px"><li>{{ method }}</li></h4>
+        <pre>{{ doc|safe }}</pre>
+        {% endfor %}
+    {% endif %}
+    {% if classes[key]['properties'] %}
+    <h3 style="margin-left: 80px">{{ key }}'s Properties</h3>
+        {% for prop, doc in classes[key]['properties'].items() %}
+        <h4 style="margin-left: 100px"><li>{{ prop }}</li></h4>
+        <pre>{{ doc|safe }}</pre>
+        {% endfor %}
+    {% endif %}
+    {% endfor %}
+</div>
+{% include "footer.html" %}
+{% endblock %}
