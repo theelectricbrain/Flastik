@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+"""
+Flastik - A Flask-like Tiny-framework for static websites.
+(c) Copyright 2019. See LICENSE for details.
+"""
 import os
 import sys
 import shutil
@@ -50,8 +54,8 @@ def build_project_folder(project_path):
     log.debug("project_path: %s", project_path)
     os.makedirs(project_path)
     # Copy templates
-    package_path = os.path.abspath(
-        os.path.join(os.path.abspath(flastik.__file__), ".."))
+    package_path = package_path = os.path.dirname(flastik.__file__)
+
     orig = os.path.join(package_path, 'base_templates')
     dest = os.path.join(project_path, 'base_templates')
     shutil.copytree(orig, dest)
@@ -78,14 +82,13 @@ def build_doc(doc_path):
     log.debug("doc_path: %s", doc_path)
     os.makedirs(doc_path)
     # Crawling Package for docstrings
-    package_path = os.path.abspath(
-        os.path.join(os.path.abspath(flastik.__file__), ".."))
+    package_path = os.path.dirname(flastik.__file__)
     functions = {}
-    for f in [ii for ii in getmembers(flastik, isfunction) if 'flastik' is ii[1].__module__]:
+    for f in [ii for ii in getmembers(flastik, isfunction) if 'flastik' in ii[1].__module__]:
         if f[1].__doc__:
             functions[f[0]] = f[1].__doc__.replace("<", "&lt;").replace(">", "&gt;")
     classes = {}
-    for c in [ii for ii in getmembers(flastik, isclass) if 'flastik' is ii[1].__module__]:
+    for c in [ii for ii in getmembers(flastik, isclass) if 'flastik' in ii[1].__module__]:
         classes[c[0]] = {'doc': None}
         # List methods
         classes[c[0]]['methods'] = {}

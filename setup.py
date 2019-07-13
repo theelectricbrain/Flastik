@@ -3,13 +3,11 @@
 Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019. See LICENSE for details.
 """
-import os
-import sys
-import shutil
 import pytest
 from setuptools import setup, Command
-from setuptools.command.install import install
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 class TestCommand(Command):
     description = "will run a series of test"
@@ -25,14 +23,20 @@ class TestCommand(Command):
         pytest.main(["./"])
 
 
-setup(name='Flastik',
+setup(name='flastik',
       version='1.0',
       description='A Flask-like Tiny-framework for static websites',
+      long_description=long_description,
       author='Dr. Thomas Roc',
       author_email='info@electricbrain.fr',
       license='GNU GPLv3',
+      classifiers=[
+          "Programming Language :: Python :: 3",
+          "License :: GNU GPLv3 License",
+          "Operating System :: OS Independent",
+      ],
       packages=['flastik'],
-      package_dir={'flastik': '', },
+      package_dir={'flastik': 'flastik', },
       package_data={'flastik': [
           'README.pdf',
           'LICENSE.txt',
@@ -41,10 +45,10 @@ setup(name='Flastik',
           'bootstrap/css/*',
           'bootstrap/popper/*',
           'bootstrap/jquery/*',
-          'bootstrap/js/*', ]},
-      install_requires=['jinja2', 'docutils'],
+          'bootstrap/js/*', ],
+      },
+      install_requires=['jinja2', 'docutils', ],
       cmdclass={'test': TestCommand},
       scripts=['scripts/flastik']
       )
-
 
