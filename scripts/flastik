@@ -57,7 +57,7 @@ def build_project_folder(project_path):
     package_path = package_path = os.path.dirname(flastik.__file__)
 
     orig = os.path.join(package_path, 'base_templates')
-    dest = os.path.join(project_path, 'base_templates')
+    dest = os.path.join(project_path, 'templates')
     shutil.copytree(orig, dest)
     # Create builder script from template
     basename = os.path.basename(project_path)

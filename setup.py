@@ -47,7 +47,7 @@ setup(name='flastik',
           'bootstrap/jquery/*',
           'bootstrap/js/*', ],
       },
-      install_requires=['jinja2', 'docutils', ],
+      install_requires=['jinja2', 'docutils', 'pytest'],
       cmdclass={'test': TestCommand},
       scripts=['scripts/flastik']
       )
