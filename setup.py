@@ -9,6 +9,7 @@ from setuptools import setup, Command
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+
 class TestCommand(Command):
     description = "will run a series of test"
     user_options = []
@@ -20,7 +21,7 @@ class TestCommand(Command):
         pass
 
     def run(self):
-        pytest.main(["./"])
+        pytest.main(["./", '--disable-pytest-warnings'])
 
 
 setup(name='flastik',

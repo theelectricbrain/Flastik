@@ -165,7 +165,7 @@ import sys
 from argparse import ArgumentParser
 from glob import glob
 # Templating imports
-from flastik import Builder, render_template
+from flastik import Builder, render_template, rst2html
 # Static files imports
 from flastik import Image, Download, collect_static_files
 # Argument parsers imports
@@ -199,9 +199,7 @@ if __name__ == "__main__":
 
 
     # Some static files
-    img = Image("Default Icon",
-                os.path.join(website.package_path, "base_templates/default_icon.png"),
-                dest="test/something_else.png")
+    img = Image("Default Icon", "./templates/default_icon.png")
 
     dwnld = Download("READ ME",
                      os.path.join(website.package_path, "README.pdf"))
