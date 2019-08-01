@@ -81,7 +81,50 @@ hello_world_str = """<!DOCTYPE html>
 </nav>
 
 
-    <h2>Hello World !</h2>
+    <div class="document" id="testing-rst2html">
+<h1 class="title">Testing rst2html</h1>
+<ol class="arabic simple">
+<li><p>numbers</p></li>
+</ol>
+<ol class="upperalpha">
+<li><p>upper-case letters
+and it goes over many lines</p>
+<p>with two paragraphs and all!</p>
+</li>
+</ol>
+<ol class="loweralpha simple">
+<li><p>lower-case letters</p>
+<ol class="arabic simple" start="3">
+<li><p>with a sub-list starting at a different number</p></li>
+<li><p>make sure the numbers are in the correct sequence though!</p></li>
+</ol>
+</li>
+</ol>
+<ol class="upperroman simple">
+<li><p>upper-case roman numerals</p></li>
+</ol>
+<ol class="lowerroman simple">
+<li><p>lower-case roman numerals</p></li>
+</ol>
+<ol class="arabic simple">
+<li><p>numbers again</p></li>
+</ol>
+<ol class="arabic simple">
+<li><p>and again</p></li>
+</ol>
+<ul class="simple">
+<li><p>a bullet point using &quot;*&quot;</p>
+<ul>
+<li><p>a sub-list using &quot;-&quot;</p>
+<ul>
+<li><p>yet another sub-list</p></li>
+</ul>
+</li>
+<li><p>another item</p></li>
+</ul>
+</li>
+</ul>
+</div>
 <br><a href='Shippy-MacShipface/cruise/1/report/index.html'>Shippy-MacShipface: report for cruise 1</a>
 <br><a href='Shippy-MacShipface/cruise/2/report/index.html'>Shippy-MacShipface: report for cruise 2</a>
 <br><a href='Boatty-MacBoatface/cruise/99/report/index.html'>Boatty-MacBoatface: report for cruise 99</a>
@@ -297,7 +340,9 @@ def test_build():
         context['img'] = img
         context['dwnld'] = dwnld
         context['title'] = "Hello World !"
-        context['body_text'] = '<h2>Hello World !</h2>'
+        #context['body_text'] = rst2html(os.path.join(
+        #    website.package_path, "test/test_restructured_text.rst"))
+        context['body_text'] = rst2html("./test/test_restructured_text.rst")
         pattern = "\n<br><a href='%s/cruise/%s/report/index.html'>%s: report for cruise %s</a>"
         for ship in ship_list:
             cruises = cruise_dict[ship]
@@ -371,6 +416,10 @@ def test_downloads():
     assert(os.path.exists(os.path.join(dest, "downloads", "README.pdf")))
     # Keep that at the end
     shutil.rmtree(dest)
+
+
+if __name__ == "__main__":
+    test_build()
 
 
 
