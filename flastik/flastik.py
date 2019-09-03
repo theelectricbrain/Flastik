@@ -763,11 +763,12 @@ def add_Builder_arguments(arg_parser):
                                  "Your templates are added to the"
                                  '"base templates" provided in the package'
                                  "(see README.pdf)")
-    arg_parser.add_argument("--use_package_templates", dest="use_package_templates",
-                            type=bool, nargs='?', default=True,
-                            help='If True (default): "base templates"'
+    arg_parser.add_argument("--do_not_use_package_templates",
+                            dest="use_package_templates",
+                            default=True, action="store_false",
+                            help='By default, "base templates"'
                                  ' will be available in the template environment.'
-                                 "\nIf False: they won't.")
+                                 "\nIf one use this option: they won't.")
     arg_parser.add_argument("--bootstrap_folder", dest="bootstrap_folder",
                             type=str, nargs='?',
                             help="""path to bootstrap folder, str.
@@ -816,11 +817,12 @@ def add_build_arguments(arg_parser):
                             type=str, nargs='+', default=[],
                             help="list of views to be built, [str.,...,str.] "
                                  "Note: All views are built by default.")
-    arg_parser.add_argument("--overwrite", dest="overwrite",
-                            type=bool, nargs='?', default=True,
-                            help="If True (default): pre-existing *.html "
+    arg_parser.add_argument("--do_not_overwrite", dest="overwrite",
+                            default=True, action="store_false",
+                            help="By default, pre-existing *.html "
                                  "files and Bootstrap suite will be "
-                                 "overwritten.")
+                                 "overwritten. They won't if one uses this "
+                                 "option")
     arg_parser.add_argument("--static_umask", dest="static_umask",
                             type=str, nargs='?', default=0o655,
                             help="U-mask for Bootstrap suite, U-mask code. "
@@ -1066,6 +1068,21 @@ class Download(StaticFile):
         """
         d_link = "<a href='%s' download>%s</a>" % (self.url, self.name)
         return d_link
+
+    # TODO: add test for that method
+    @property
+    def size(self, precision=1):
+        """Return a humanized string representation of a given file
+
+        """
+        bytes_size = os.path.getsize(self.source)
+        suffixes = ['B', 'KB', 'MB', 'GB', 'TB']
+        suffixIndex = 0
+        while bytes_size > 1024:
+            suffixIndex += 1  # increment the index of the suffix
+            bytes_size = bytes_size / 1024.0  # apply the division
+        return "%.*f %s" % (precision, bytes_size, suffixes[suffixIndex])
+
     # TODO: add similar templating methods specific to downloads below
 
 
@@ -1148,14 +1165,16 @@ def add_collect_static_files_arguments(arg_parser):
     arg_parser.add_argument("--static_root", dest="static_root",
                             type=str, nargs='?',
                             help="""path to site root directory, str.""")
-    arg_parser.add_argument("--overwrite_static", dest="overwrite_static",
-                            type=bool, nargs='?', default=True,
-                            help="""If True (default): existing static files 
-                            will be overwritten.\nIf False: they won't""")
+    arg_parser.add_argument("--do_not_overwrite_static", dest="overwrite_static",
+                            default=True, action="store_false",
+                            help="By default, existing static files "
+                            "will be overwritten.\nIf one uses this option: "
+                            "they won't")
     arg_parser.add_argument("--copy_locally", dest="copy_locally",
-                            type=bool, nargs='?', default=False,
-                            help="""If True: static files will copied locally.
-                            \nIf False (default): symlinks will be used instead""")
+                            default=False, action="store_true",
+                            help="If one uses this option, static files "
+                            "will copied locally. By default, symlinks "
+                            "are used instead")
     arg_parser.add_argument("--file_umask", dest="file_umask",
                             type=str, nargs='?', default=0o644,
                             help="""u-mask for files, Operating-system mode bitfield.

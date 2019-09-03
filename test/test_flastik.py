@@ -316,7 +316,6 @@ cruise_n_data_str = """<!DOCTYPE html>
 
 # Building test web site
 def test_build():
-    # TODO: add test for rst2html
     # Define Argument parser
     arg_parser = ArgumentParser()
     # - add Builder's arg
@@ -340,8 +339,6 @@ def test_build():
         context['img'] = img
         context['dwnld'] = dwnld
         context['title'] = "Hello World !"
-        #context['body_text'] = rst2html(os.path.join(
-        #    website.package_path, "test/test_restructured_text.rst"))
         context['body_text'] = rst2html("./test/test_restructured_text.rst")
         pattern = "\n<br><a href='%s/cruise/%s/report/index.html'>%s: report for cruise %s</a>"
         for ship in ship_list:

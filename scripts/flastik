@@ -159,6 +159,8 @@ def build_doc(doc_path):
 
 # Local lib.
 builder_template = """
+#!/usr/bin/env python
+
 import os
 import shutil
 import sys
