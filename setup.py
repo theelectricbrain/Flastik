@@ -30,7 +30,6 @@ setup(name='flastik',
       long_description=long_description,
       author='Dr. Thomas Roc',
       author_email='info@electricbrain.fr',
-      license='GNU General Public License v3 (GPLv3)',
       classifiers=[
           "Programming Language :: Python :: 3",
           "License :: GNU GPLv3 License",
