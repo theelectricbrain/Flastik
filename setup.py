@@ -30,7 +30,7 @@ setup(name='flastik',
       long_description=long_description,
       author='Dr. Thomas Roc',
       author_email='info@electricbrain.fr',
-      license='GNU GPLv3',
+      license='GNU General Public License v3 (GPLv3)',
       classifiers=[
           "Programming Language :: Python :: 3",
           "License :: GNU GPLv3 License",
@@ -50,6 +50,7 @@ setup(name='flastik',
       },
       install_requires=['jinja2', 'docutils', 'pytest'],
       cmdclass={'test': TestCommand},
-      scripts=['scripts/flastik']
+      scripts=['scripts/flastik'],
+      python_requires='>=3.6'
       )
 

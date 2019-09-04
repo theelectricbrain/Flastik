@@ -31,5 +31,5 @@ In order to install Flastik:
 Once Flastik installed, run "flastik --create_doc" from a command
 line in order to have access to more detailed documentation.
 
-Similarly, to start up a new flastik prioject, run "flastik 
+Similarly, to start up a new flastik project, run "flastik 
 --create_project PROJECT_NAME" from a command line.
