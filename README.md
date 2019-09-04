@@ -1,6 +1,5 @@
-<p align="center">
 ![Flastik Icon](https://github.com/theelectricbrain/Flastik/blob/master/flastik/base_templates/default_icon.png =300x300)
-</p>
+
 # Flastik
 Flastik is a tiny-framework for static website design inspired 
 by Flask micro-framework. It provides tools for designing simple 
