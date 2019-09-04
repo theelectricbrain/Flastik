@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/theelectricbrain/Flastik.svg?branch=master)](https://travis-ci.org/theelectricbrain/Flastik)
 <p align="center">
    <img align="middle" src='https://github.com/theelectricbrain/Flastik/blob/master/flastik/base_templates/default_icon.png' width='250' height='250'>
 </p>
