@@ -1,4 +1,6 @@
-![Flastik Icon](https://github.com/theelectricbrain/Flastik/blob/master/flastik/base_templates/default_icon.png =300x300)
+<p align="center">
+   <img align="middle" src='https://github.com/theelectricbrain/Flastik/blob/master/flastik/base_templates/default_icon.png' width='250' height='250'>
+</p>
 
 # Flastik
 Flastik is a tiny-framework for static website design inspired 
