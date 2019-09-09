@@ -25,7 +25,7 @@ class TestCommand(Command):
 
 
 setup(name='flastik',
-      version='1.0',
+      version='1.0.2',
       description='A Flask-like Tiny-framework for static websites',
       long_description=long_description,
       long_description_content_type="text/markdown",
