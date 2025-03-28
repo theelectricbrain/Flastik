@@ -20,21 +20,21 @@ collect_static_files function).
 
 ## Installation
 In order to install Flastik:
- * Change directory to the FlastiK code base
- * Run “pip install .”, or “python setup.py install” if you don’t 
+ * Change directory to the Flastik code base
+ * Run `pip install .`, or `python setup.py install` if you don’t 
    have pip installed on your work station, to install the package 
-   (or “sudo python setup.py install”/”sudo pip install .” if root 
+   (or `sudo python setup.py install`/`sudo pip install .` if root 
    permission is required)
- * Finally run “python setup.py test”  to test the sanity of the 
-   package installation (or “sudo python setup.py test” if root 
+ * Finally run `python setup.py test` to test the sanity of the 
+   package installation (or `sudo python setup.py test` if root 
    permission is required)
 
 ## Usage
-Once Flastik installed, run "flastik --create_doc" from a command
+Once Flastik installed, run `flastik --create_doc` from a command
 line in order to have access to more detailed documentation.
 
-Similarly, to start up a new flastik project, run "flastik 
---create_project PROJECT_NAME" from a command line.
+Similarly, to start up a new flastik project, run `flastik 
+--create_project ${PROJECT_NAME}` from a command line.
 
 ## License
 Flastik is distributed under the GNU GPLv3 License (see LICENSE) and
