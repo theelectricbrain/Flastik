@@ -39,5 +39,5 @@ Similarly, to start up a new flastik project, run `flastik
 
 ## License
 Flastik is distributed under the GNU GPLv3 License (see LICENSE) and
-Bootstrap under the MIT License (see ./flastik/bootstrap/BOOTSTRAP_LICENSE).
+Bootstrap under the MIT License (see [Bootstrap License](./flastik/bootstrap/BOOTSTRAP_LICENSE)).
 
