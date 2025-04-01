@@ -81,7 +81,7 @@ hello_world_str = """<!DOCTYPE html>
 </nav>
 
 
-    <div class="document" id="testing-rst2html">
+    <main id="testing-rst2html">
 <h1 class="title">Testing rst2html</h1>
 <ol class="arabic simple">
 <li><p>numbers</p></li>
@@ -124,7 +124,7 @@ and it goes over many lines</p>
 </ul>
 </li>
 </ul>
-</div>
+</main>
 <br><a href='Shippy-MacShipface/cruise/1/report/index.html'>Shippy-MacShipface: report for cruise 1</a>
 <br><a href='Shippy-MacShipface/cruise/2/report/index.html'>Shippy-MacShipface: report for cruise 2</a>
 <br><a href='Boatty-MacBoatface/cruise/99/report/index.html'>Boatty-MacBoatface: report for cruise 99</a>
@@ -375,6 +375,7 @@ def test_build():
 def test_hello_world():
     with open(os.path.join(dest, "hello_world.html"), "r") as f:
         hello_world_html = f.read()
+
     assert(hello_world_html == hello_world_str)
 
 

@@ -1,0 +1,21 @@
+*.pyc
+.eggs/
+/dist/
+django_helpdesk.egg-info
+demo/*.egg-info
+demo/demodesk/*.sqlite3
+docs/html/*
+docs/doctrees/*
+.coverage
+.project
+.pydevproject
+.directory
+*.swp
+.idea
+.tox/**
+.venv
+
+# flastik specific
+build/*
+flastik.egg-info/*
+flastik_ERROR.log
