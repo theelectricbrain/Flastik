@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/theelectricbrain/Flastik.svg?branch=master)](https://travis-ci.org/theelectricbrain/Flastik)
+[![Coverage Status](coverage.svg)](https://github.com/ericsalesdeandrade/pytest-github-actions-example)
 <p align="center">
    <img align="middle" src='https://raw.githubusercontent.com/theelectricbrain/Flastik/master/flastik/base_templates/default_icon.png' width='250' height='250'>
 </p>
