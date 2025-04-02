@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/theelectricbrain/Flastik.svg?branch=master)](https://travis-ci.org/theelectricbrain/Flastik)
 
-[![Pytest](https://github.com/DavidVadnais/Flastik/actions/workflows/pytest.yml/badge.svg)](https://github.com/DavidVadnais/Flastik/actions/workflows/pytest.yml)<p align="center">
+[![Pytest](https://github.com/theelectricbrain/Flastik/actions/workflows/pytest.yml/badge.svg)](https://github.com/theelectricbrain/Flastik/actions/workflows/pytest.yml)<p align="center">
    <img align="middle" src='https://raw.githubusercontent.com/theelectricbrain/Flastik/master/flastik/base_templates/default_icon.png' width='250' height='250'>
 </p>
 
