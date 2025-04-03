@@ -58,7 +58,7 @@ class Builder:
                 If False: they won't.
 
             bootstrap_folder: path to bootstrap folder, str.
-                If None (default): a complete distribution of Bootstrap 4.3.1
+                If None (default): a complete distribution of Bootstrap 5.3.3
                     will be used and copied in static_website_root/static at
                     built/deployment
                 Otherwise: specified will be used and linked to
