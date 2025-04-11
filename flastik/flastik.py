@@ -267,7 +267,7 @@ class Builder:
         # - generate list of route variables
         route_vars = []
         if found:
-            print(f"Generating Route: {route_pattern} ; Vars.: {route_vars}")
+            log.debug(f"Generating Route: {route_pattern} ; Vars.: {route_vars}")
             route_vars = self._generate_route_vars(found, kwargs_deco, route)
         # - check if routes already in use, if not store them
         for vv in route_vars:
