@@ -221,8 +221,8 @@ class Builder:
         """
         # Note: boiler plate inspired by
         #       https://realpython.com/primer-on-python-decorators/#more-real-world-examples
-        log.debug("route: %s", route)
-        log.debug("deco kwargs: %s", kwargs_deco)
+        log.debug(f"route: {route}", )
+        log.debug(f"deco kwargs: {kwargs_deco}")
         # Regular expression for generic <type:var>
         reg_expr = r"<\s*?(\b\w+\b)\s*?:\s*?(\b\w+\b)\s*?>"
         # Separate HTML file name from route
@@ -234,8 +234,8 @@ class Builder:
                 msg = (
                     "Logic cannot be used in html file names in Flastik"
                     " projects.\nIt is unfortunate but it is what it is, "
-                    "please change '%s'"
-                ) % html_name
+                    f"please change '{html_name}'"
+                ) 
                 log.error(msg)
                 raise Exception(msg)
             route = route.replace(html_name, "")
@@ -252,23 +252,23 @@ class Builder:
         if len(found) is not len(key_args):
             msg = (
                 "Number of key variables does not match the number of "
-                "variables specified in the route: %s"
-            ) % route
+                f"variables specified in the route: {route}"
+            ) 
             log.error(msg)
             raise Exception(msg)
         # - check if names are similar between route and kwargs_deco
         if not [t[1] for t in found] == key_args:
             msg = (
                 "There is a mismatch in the naming or the order between "
-                "the kwargs and the variables specify in %s"
-            ) % route
+                f"the kwargs and the variables specify in {route}"
+            ) 
             log.error(msg)
             raise Exception(msg)
         # - generate list of route variables
         route_vars = []
         if found:
+            log.debug(f"Generating Route: {route_pattern} ; Vars.: {route_vars}")
             route_vars = self._generate_route_vars(found, kwargs_deco, route)
-            log.debug("Route: %s ; Vars.: %s", route_pattern, route_vars)
         # - check if routes already in use, if not store them
         for vv in route_vars:
             new_pattern = route_pattern % vv
@@ -601,18 +601,18 @@ class Builder:
         types = set([type(n) for n in var_val])
         if len(types) != 1:
             msg = (
-                "Error type in %s list. Only list of uniform values are"
-                "supported.\nE.g. route: %s; types: %s"
-            ) % (var_name, route, [str(type(vv)) for vv in var_val])
+                f"Error type in {var_name} list. Only list of uniform values are"
+                f"supported.\nE.g. route: {route}; types: {[str(type(vv)) for vv in var_val]}"
+            ) 
             log.error(msg)
             raise Exception(msg)
 
         if list not in types:
             if var_type == "string" and not all(isinstance(n, str) for n in var_val):
                 msg = (
-                    "Error type in %s values. 'string' type only valid for "
-                    "list of str.\nE.g. Var.: %s ; route: %s"
-                ) % (var_name, route)
+                    f"Error type in {type(var_type)} values. 'string' type only valid for "
+                    f"list of str.\nE.g. Var.: {var_name} ; route: {route}"
+                ) 
                 log.error(msg)
                 raise Exception(msg)
             elif var_type == "int" and not all(isinstance(n, int) for n in var_val):
@@ -675,7 +675,7 @@ class Builder:
             values = kwargs_deco[group[1]]
             # - sanity check if first container is a list or dict
             if not isinstance(values, (list, dict)):
-                msg = "Error type: %s variable must be a list or a dict." % group[1]
+                msg = f"Error type: {group[1]} variable must be a list or a dict." 
                 log.error(msg)
                 raise Exception(msg)
             var_type = group[0]
@@ -691,7 +691,7 @@ class Builder:
             else:
                 var_val = self.check_vars_vs_type(var_type, var_name, values, route)
                 var_lists.append(var_val)
-        log.debug("Var list: %s", var_lists)
+        log.debug(f"Var list: {var_lists}")
         # Generate list of route variables
         # - if dealing with a list of strings only
         if all_strings:
