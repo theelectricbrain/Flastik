@@ -23,7 +23,7 @@ context = {
         {'name': 'home', 'url': "?"},
         {'name': 'test', 'url': 'https://github.com/theelectricbrain'},
     ],
-    'footer_link': {'name': 'Flastik - Copyright 2019', 'url': 'https://github.com/theelectricbrain'},
+    'footer_link': {'name': 'Flastik - Copyright 2019-2025', 'url': 'https://github.com/theelectricbrain'},
 }
 
 ship_list = ["Shippy-MacShipface", "Boatty-MacBoatface"]
@@ -142,7 +142,7 @@ and it goes over many lines</p>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2025</a></div>
     </div>
 </div>
 
@@ -220,7 +220,7 @@ cruise_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2025</a></div>
     </div>
 </div>
 
@@ -299,7 +299,7 @@ cruise_n_data_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2025</a></div>
     </div>
 </div>
 

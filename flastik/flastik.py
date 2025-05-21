@@ -617,32 +617,32 @@ class Builder:
                 raise Exception(msg)
             elif var_type == "int" and not all(isinstance(n, int) for n in var_val):
                 msg = (
-                    "Error type in %s values. 'int' type only valid for list of int."
-                    "\nE.g. Var.: %s ; route: %s"
-                ) % (var_name, route)
+                    f"Error type in {var_name} values. 'int' type only valid for list of int."
+                    f"\nE.g. Var.: {var_name} ; route: {route}"
+                )
                 log.error(msg)
                 raise Exception(msg)
             elif var_type == "float" and not all(isinstance(n, float) for n in var_val):
                 msg = (
-                    "Error type in %s values. 'float' type only valid for list of floats."
-                    "\nE.g. Var.: %s ; route: %s"
-                ) % (var_name, route)
+                    f"Error type in {var_name} values. 'float' type only valid for list of floats."
+                    f"\nE.g. Var.: {var_name} ; route: {route}"
+                )
                 log.error(msg)
                 raise Exception(msg)
             # FIXME: not sure if I need that check !?
             elif var_type == "path" and not all(os.path.exists(n) for n in var_val):
                 msg = (
-                    "Error in %s values. Some of those paths do not exist."
-                    "\nE.g. Var.: %s ; route: %s"
-                ) % (var_name, route)
+                    f"Error in {var_name} values. Some of those paths do not exist."
+                    f"\nE.g. Var.: {var_name} ; route: {route}"
+                )
                 log.error(msg)
                 raise Exception(msg)
             elif var_type not in ["string", "int", "float", "path"]:
                 msg = (
-                    "'%s' type in %s is not supported. "
+                    f"'{var_type}' type in {var_name} is not supported. "
                     "Available types: string, int, float, path. "
-                    "\nE.g. Var. Type: %s ; Var.: %s ; route: %s"
-                ) % (var_type, var_name, route)
+                    f"\nE.g. Var. Type: {var_type} ; Var.: {var_name} ; route: {route}"
+                )
                 log.error(msg)
                 raise Exception(msg)
             else:
@@ -699,46 +699,46 @@ class Builder:
         # - otherwise
         else:
             required_keys = []
-            for l, group in zip(var_lists, found):
+            for key_list, group in zip(var_lists, found):
                 var_name = group[1]
                 #  * first time around
                 if not route_vars:
-                    if isinstance(l, dict):  # Dict of list
+                    if isinstance(key_list, dict):  # Dict of list
                         msg = (
                             "'%s' dict requires %s to be defined just before in the url."
-                            % (var_name, l.keys())
+                            % (var_name, key_list.keys())
                         )
                         log.error(msg)
                         raise Exception(msg)
                     else:  # List of values
-                        route_vars = [[vv] for vv in l]
-                    required_keys = l
+                        route_vars = [[vv] for vv in key_list]
+                    required_keys = key_list
                 #  * next time around
                 else:
                     old_route_vars = route_vars.copy()
                     route_vars = []
-                    if isinstance(l, dict):  # Dict of list
+                    if isinstance(key_list, dict):  # Dict of list
                         # Dict keys must match previous ramification
-                        if not set(l.keys()) == set(required_keys):  # Sanity check
+                        if not set(key_list.keys()) == set(required_keys):  # Sanity check
                             msg = "'%s' dict. requires %s as keys and not %s." % (
                                 var_name,
                                 required_keys,
-                                l.keys(),
+                                key_list.keys(),
                             )
                             log.error(msg)
                             raise Exception(msg)
                         for rr in old_route_vars:
-                            lv = l[rr[-1]]
+                            lv = key_list[rr[-1]]
                             for vv in lv:
                                 route_vars.append(rr + [vv])
                         # - resets requirement
                         required_keys = []
                     else:  # List of values
                         for rr in old_route_vars:
-                            for vv in l:
+                            for vv in key_list:
                                 route_vars.append(rr + [vv])
                         # - defines ramification requirement for dict.
-                        required_keys = l
+                        required_keys = key_list
             #  * turn inside lists into tuples
             route_vars = [tuple(lv) for lv in route_vars]
 
