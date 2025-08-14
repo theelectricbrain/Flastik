@@ -30,7 +30,7 @@ class Builder:
 
     def __init__(
         self,
-        templates=None,
+        template_dirs=None,
         use_package_templates=True,
         bootstrap_folder=None,
         css_style_sheet=None,
@@ -123,44 +123,7 @@ class Builder:
         if author:
             self.meta["author"] = author
         # - Template loader
-        standard_templates_path = os.path.join(os.getcwd(), "templates/")
-        custom_loader = None
-        loader = None
-        #  * custom templates
-        if templates:
-            if os.path.isdir(templates):
-                log.info("Using specified template folder: %s", templates)
-                custom_loader = FileSystemLoader(templates)
-            else:
-                msg = "Invalid path to templates: %s" % templates
-                log.error(msg)
-                raise Exception(msg)
-        elif not templates and os.path.isdir(standard_templates_path):
-            log.info("Using standard template folder: %s", standard_templates_path)
-            custom_loader = FileSystemLoader(standard_templates_path)
-        if not use_package_templates and not custom_loader:
-            msg = (
-                "No templates were found.\n Either set"
-                "use_package_templates=True or specify "
-                "templates='/path/to/your/templates/"
-            )
-            log.error(msg)
-            raise Exception(msg)
-        #  * package Templates
-        # Note: if same name, user template override package template
-        if use_package_templates:
-            package_loader = FileSystemLoader(
-                os.path.join(self.package_path, "base_templates")
-            )
-            if custom_loader:
-                log.info("Using both package & specified template folders")
-                loader = ChoiceLoader([custom_loader, package_loader])
-            else:
-                log.info("Using package template folder only")
-                loader = package_loader
-        else:
-            log.info("Using specified template folder only")
-            loader = custom_loader
+        loader = self._make_loader(template_dirs, use_package_templates)
         #  * sanity check
         if loader is None:
             msg = """No templates where found for this project.
@@ -652,6 +615,25 @@ class Builder:
         return var_val
 
     # Hidden Methods
+    def _make_loader(self, template_dirs=None, include_package_templates=True):
+        if isinstance(template_dirs, str):
+            template_dirs = [template_dirs]
+        template_dirs = template_dirs or []
+
+        search_path = list(template_dirs)
+
+        if include_package_templates:
+            search_path.append(os.path.join(self.package_path, "base_templates"))
+
+        if not search_path:
+            raise RuntimeError(
+                "No template directory found. Either pass template_dirs=… "
+                "or set include_package_templates=True."
+            )
+
+        return FileSystemLoader(search_path)
+
+
     def _generate_route_vars(self, found, kwargs_deco, route):
         """
         Generate the variables associated with a routing pattern.
@@ -1215,7 +1197,6 @@ class Download(StaticFile):
         return "%.*f %s" % (precision, bytes_size, suffixes[suffixIndex])
 
     # TODO: add similar templating methods specific to downloads below
-
 
 def collect_static_files(
     static_root=None,
