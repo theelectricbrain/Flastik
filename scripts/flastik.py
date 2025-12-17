@@ -222,7 +222,7 @@ if __name__ == "__main__":
 
     # Building Website and collecting statics
     website.build(**options)
-    collect_static_files(**options)       
+    collect_static_files(**options)
 """
 
 if __name__ == "__main__":
