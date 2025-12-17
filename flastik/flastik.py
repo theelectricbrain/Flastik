@@ -11,7 +11,7 @@ import shutil
 import logging
 import itertools
 from functools import wraps
-from jinja2 import Environment, ChoiceLoader, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 from docutils.core import publish_parts
 from uuid import uuid4
 
@@ -198,7 +198,7 @@ class Builder:
                     "Logic cannot be used in html file names in Flastik"
                     " projects.\nIt is unfortunate but it is what it is, "
                     f"please change '{html_name}'"
-                ) 
+                )
                 log.error(msg)
                 raise Exception(msg)
             route = route.replace(html_name, "")
@@ -216,7 +216,7 @@ class Builder:
             msg = (
                 "Number of key variables does not match the number of "
                 f"variables specified in the route: {route}"
-            ) 
+            )
             log.error(msg)
             raise Exception(msg)
         # - check if names are similar between route and kwargs_deco
@@ -224,7 +224,7 @@ class Builder:
             msg = (
                 "There is a mismatch in the naming or the order between "
                 f"the kwargs and the variables specify in {route}"
-            ) 
+            )
             log.error(msg)
             raise Exception(msg)
         # - generate list of route variables
@@ -566,7 +566,7 @@ class Builder:
             msg = (
                 f"Error type in {var_name} list. Only list of uniform values are"
                 f"supported.\nE.g. route: {route}; types: {[str(type(vv)) for vv in var_val]}"
-            ) 
+            )
             log.error(msg)
             raise Exception(msg)
 
@@ -575,7 +575,7 @@ class Builder:
                 msg = (
                     f"Error type in {type(var_type)} values. 'string' type only valid for "
                     f"list of str.\nE.g. Var.: {var_name} ; route: {route}"
-                ) 
+                )
                 log.error(msg)
                 raise Exception(msg)
             elif var_type == "int" and not all(isinstance(n, int) for n in var_val):
@@ -657,7 +657,7 @@ class Builder:
             values = kwargs_deco[group[1]]
             # - sanity check if first container is a list or dict
             if not isinstance(values, (list, dict)):
-                msg = f"Error type: {group[1]} variable must be a list or a dict." 
+                msg = f"Error type: {group[1]} variable must be a list or a dict."
                 log.error(msg)
                 raise Exception(msg)
             var_type = group[0]
