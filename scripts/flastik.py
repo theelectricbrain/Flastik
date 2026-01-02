@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Flastik - A Flask-like Tiny-framework for static websites.
-(c) Copyright 2019-2025. See LICENSE for details.
+(c) Copyright 2019-2026. See LICENSE for details.
 """
 import os
 import sys
@@ -108,7 +108,7 @@ def build_doc(doc_path):
     context = {
         'project_name': 'Flastik',
         'project_url': "https://github.com/theelectricbrain",
-        'footer_link': {'name': 'Powered by Flastik - Copyright 2019-2025', 'url': 'https://github.com/theelectricbrain'},
+        'footer_link': {'name': 'Powered by Flastik - Copyright 2019-2026', 'url': 'https://github.com/theelectricbrain'},
     }
     # Views
     @website.route("/flastik.html")
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     context = dict(
         project_name=os.path.basename(os.getcwd()),
         footer_link={
-            'name': 'Flastik - Copyright 2019-2025',
+            'name': 'Flastik - Copyright 2019-2026',
             'url': 'https://github.com/theelectricbrain'},
     )
 

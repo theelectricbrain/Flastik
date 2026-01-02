@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Flastik - A Flask-like Tiny-framework for static websites.
-(c) Copyright 2019-2025. See LICENSE for details.
+(c) Copyright 2019-2026. See LICENSE for details.
 """
 import os
 import shutil
@@ -23,7 +23,7 @@ context = {
         {'name': 'home', 'url': "?"},
         {'name': 'test', 'url': 'https://github.com/theelectricbrain'},
     ],
-    'footer_link': {'name': 'Flastik - Copyright 2019-2025', 'url': 'https://github.com/theelectricbrain'},
+    'footer_link': {'name': 'Flastik - Copyright 2019-2026', 'url': 'https://github.com/theelectricbrain'},
 }
 
 ship_list = ["Shippy-MacShipface", "Boatty-MacBoatface"]
@@ -36,7 +36,7 @@ hello_world_str = """<!DOCTYPE html>
     <!-- Meta -->
     <meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
+
     <!-- Favicon -->
     <link rel="shortcut icon" href="static/favicon.ico">
     <!-- Bootstrap CSS -->
@@ -46,12 +46,12 @@ hello_world_str = """<!DOCTYPE html>
     <!-- Block Title -->
     <title>Hello World !</title>
     <!-- Block Header -->
-    
+
 </head>
 
 <!-- Block Title -->
 <body>
-    
+
 <!-- Navigation -->
 
 <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
@@ -66,15 +66,15 @@ hello_world_str = """<!DOCTYPE html>
   <!-- Everything you want hidden at 940px or less, place within here -->
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
-      
+
       <li class="nav-item active">
         <a class="nav-link" href="?">home</a>
       </li>
-      
+
       <li class="nav-item active">
         <a class="nav-link" href="https://github.com/theelectricbrain">test</a>
       </li>
-      
+
 
     </ul>
   </div>
@@ -142,7 +142,7 @@ and it goes over many lines</p>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2025</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2026</a></div>
     </div>
 </div>
 
@@ -162,7 +162,7 @@ cruise_str = """<!DOCTYPE html>
     <!-- Meta -->
     <meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
+
     <!-- Favicon -->
     <link rel="shortcut icon" href="../../../static/favicon.ico">
     <!-- Bootstrap CSS -->
@@ -172,12 +172,12 @@ cruise_str = """<!DOCTYPE html>
     <!-- Block Title -->
     <title>Shippy-MacShipface: Cruise 1</title>
     <!-- Block Header -->
-    
+
 </head>
 
 <!-- Block Title -->
 <body>
-    
+
 <!-- Navigation -->
 
 <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
@@ -192,15 +192,15 @@ cruise_str = """<!DOCTYPE html>
   <!-- Everything you want hidden at 940px or less, place within here -->
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
-      
+
       <li class="nav-item active">
         <a class="nav-link" href="../../../hello_world.html">home</a>
       </li>
-      
+
       <li class="nav-item active">
         <a class="nav-link" href="https://github.com/theelectricbrain">test</a>
       </li>
-      
+
 
     </ul>
   </div>
@@ -208,7 +208,7 @@ cruise_str = """<!DOCTYPE html>
 
 
     <h2>This cruise 1. Hail to the Shippy-MacShipface !</h2>
-    
+
     <br><h3>Default Icon: </h3><img src="../../../images/test/something_else.png" class="img-fluid" alt="Default Icon">
     <br><h3>Testing url_for from Template: "Home" = ../../../hello_world.html</h3>
     <br>
@@ -220,7 +220,7 @@ cruise_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2025</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2026</a></div>
     </div>
 </div>
 
@@ -241,7 +241,7 @@ cruise_n_data_str = """<!DOCTYPE html>
     <!-- Meta -->
     <meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
+
     <!-- Favicon -->
     <link rel="shortcut icon" href="../../../../static/favicon.ico">
     <!-- Bootstrap CSS -->
@@ -251,12 +251,12 @@ cruise_n_data_str = """<!DOCTYPE html>
     <!-- Block Title -->
     <title>data - Shippy-MacShipface</title>
     <!-- Block Header -->
-    
+
 </head>
 
 <!-- Block Title -->
 <body>
-    
+
 <!-- Navigation -->
 
 <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
@@ -271,15 +271,15 @@ cruise_n_data_str = """<!DOCTYPE html>
   <!-- Everything you want hidden at 940px or less, place within here -->
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
-      
+
       <li class="nav-item active">
         <a class="nav-link" href="../../../../hello_world.html">home</a>
       </li>
-      
+
       <li class="nav-item active">
         <a class="nav-link" href="https://github.com/theelectricbrain">test</a>
       </li>
-      
+
 
     </ul>
   </div>
@@ -287,7 +287,7 @@ cruise_n_data_str = """<!DOCTYPE html>
 
 
     <h2>Welcome to the data folder for the 1 cruise of the Shippy-MacShipface</h2>
-    
+
     <br><h3>Default Icon: </h3><img src="../../../../images/test/something_else.png" class="img-fluid" alt="Default Icon">
     <br><h3>Testing url_for from Template: "Home" = ../../../../hello_world.html</h3>
     <br>
@@ -299,7 +299,7 @@ cruise_n_data_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2025</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2026</a></div>
     </div>
 </div>
 
