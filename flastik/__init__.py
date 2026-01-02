@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Flastik - A Flask-like Tiny-framework for static websites.
-(c) Copyright 2019-2025. See LICENSE for details.
+(c) Copyright 2019-2026. See LICENSE for details.
 """
 
 # Meta
@@ -12,7 +12,7 @@ __author_email__ = 'info@electricbrain.fr'
 __license__ = 'GNU GPLv3'
 
 from .flastik import (
-    Builder, 
+    Builder,
     check_url_for_unsafe_characters,
     check_path_for_illegal_characters,
     apply_umasks,

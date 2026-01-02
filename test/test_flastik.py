@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Flastik - A Flask-like Tiny-framework for static websites.
-(c) Copyright 2019-2025. See LICENSE for details.
+(c) Copyright 2019-2026. See LICENSE for details.
 """
 import os
 import shutil
@@ -23,7 +23,7 @@ context = {
         {'name': 'home', 'url': "?"},
         {'name': 'test', 'url': 'https://github.com/theelectricbrain'},
     ],
-    'footer_link': {'name': 'Flastik - Copyright 2019-2025', 'url': 'https://github.com/theelectricbrain'},
+    'footer_link': {'name': 'Flastik - Copyright 2019-2026', 'url': 'https://github.com/theelectricbrain'},
 }
 
 ship_list = ["Shippy-MacShipface", "Boatty-MacBoatface"]
@@ -142,7 +142,7 @@ and it goes over many lines</p>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2025</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2026</a></div>
     </div>
 </div>
 
@@ -220,7 +220,7 @@ cruise_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2025</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2026</a></div>
     </div>
 </div>
 
@@ -299,7 +299,7 @@ cruise_n_data_str = """<!DOCTYPE html>
 <!-- Footer -->
 <div id="footer">
     <div>
-        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2025</a></div>
+        <div><a href="https://github.com/theelectricbrain">Flastik - Copyright 2019-2026</a></div>
     </div>
 </div>
 
@@ -418,12 +418,3 @@ def test_downloads():
 
 if __name__ == "__main__":
     test_build()
-
-
-
-
-
-
-
-
-
