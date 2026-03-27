@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flastik"
+version = "1.0.2"
+description = "A Flask-like Tiny-framework for static websites"
+readme = "README.md"
+authors = [
+    { name = "Dr. Thomas Roc", email = "info@electricbrain.fr" }
+]
+requires-python = ">=3.6"
+dependencies = ["jinja2", "docutils", "pytest"]
+
+[project.scripts]
+flastik = "scripts.flastik:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["flastik"]
+
+[tool.setuptools.package-data]
+flastik = [
+    "README.pdf",
+    "LICENSE.txt",
+    "base_templates/*",
+    "doc_templates/*",
+    "bootstrap/css/*",
+    "bootstrap/popper/*",
+    "bootstrap/jquery/*",
+    "bootstrap/js/*",
+]
