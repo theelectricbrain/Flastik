@@ -45,7 +45,7 @@ setup(name='flastik',
       },
       install_requires=['jinja2', 'docutils', 'pytest'],
       cmdclass={'test': TestCommand},
-      scripts=['scripts/flastik'],
+      scripts=['scripts/flastik.py'],
       python_requires='>=3.6'
       )
 
