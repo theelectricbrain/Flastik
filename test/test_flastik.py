@@ -146,12 +146,8 @@ and it goes over many lines</p>
     </div>
 </div>
 
-    <!-- JQuery -->
-    <script type="text/javascript" src="static/jquery/jquery-3.4.1.min.js"></script>
-    <!-- Popper -->
-    <script type="text/javascript" src="static/popper/popper.min.js "></script>
-    <!-- Bootstrap  Core JavaScript -->
-    <script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+    <!-- Bootstrap Bundle (includes Popper) -->
+    <script type="text/javascript" src="static/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>"""
@@ -224,12 +220,8 @@ cruise_str = """<!DOCTYPE html>
     </div>
 </div>
 
-    <!-- JQuery -->
-    <script type="text/javascript" src="../../../static/jquery/jquery-3.4.1.min.js"></script>
-    <!-- Popper -->
-    <script type="text/javascript" src="../../../static/popper/popper.min.js "></script>
-    <!-- Bootstrap  Core JavaScript -->
-    <script type="text/javascript" src="../../../static/js/bootstrap.min.js"></script>
+    <!-- Bootstrap Bundle (includes Popper) -->
+    <script type="text/javascript" src="../../../static/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>"""
@@ -303,12 +295,8 @@ cruise_n_data_str = """<!DOCTYPE html>
     </div>
 </div>
 
-    <!-- JQuery -->
-    <script type="text/javascript" src="../../../../static/jquery/jquery-3.4.1.min.js"></script>
-    <!-- Popper -->
-    <script type="text/javascript" src="../../../../static/popper/popper.min.js "></script>
-    <!-- Bootstrap  Core JavaScript -->
-    <script type="text/javascript" src="../../../../static/js/bootstrap.min.js"></script>
+    <!-- Bootstrap Bundle (includes Popper) -->
+    <script type="text/javascript" src="../../../../static/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>"""
@@ -401,9 +389,7 @@ def test_static():
     assert(os.path.exists(os.path.join(dest, "static", "stylesheet.css")))
     assert (os.path.exists(os.path.join(dest, "static", "favicon.ico")))
     assert (os.path.exists(os.path.join(dest, "static", "css", "bootstrap.min.css")))
-    assert (os.path.exists(os.path.join(dest, "static", "jquery", "jquery-3.4.1.min.js")))
-    assert (os.path.exists(os.path.join(dest, "static", "js", "bootstrap.min.js")))
-    assert (os.path.exists(os.path.join(dest, "static", "popper", "popper.min.js")))
+    assert (os.path.exists(os.path.join(dest, "static", "js", "bootstrap.bundle.min.js")))
 
 
 def test_images():
