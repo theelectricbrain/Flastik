@@ -322,6 +322,12 @@ def test_build():
     dwnld = Download("README",
                      os.path.join(website.package_path, "README.pdf"))
 
+    # An Image and a Download may share a file name: they are deployed to
+    # separate folders, so their destinations do not collide.
+    icon = os.path.join(website.package_path, "base_templates/default_icon.png")
+    Image("Shared Name", icon, dest="shared_name.png")
+    Download("Shared Name", icon, dest="shared_name.png")
+
     @website.route("/hello_world.html")
     def hello_world():
         context['img'] = img
@@ -394,10 +400,12 @@ def test_static():
 
 def test_images():
     assert(os.path.exists(os.path.join(dest, "images", "test", "something_else.png")))
+    assert(os.path.exists(os.path.join(dest, "images", "shared_name.png")))
 
 
 def test_downloads():
     assert(os.path.exists(os.path.join(dest, "downloads", "README.pdf")))
+    assert(os.path.exists(os.path.join(dest, "downloads", "shared_name.png")))
     # Keep that at the end
     shutil.rmtree(dest)
 

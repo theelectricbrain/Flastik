@@ -1016,6 +1016,10 @@ def render_template(template_name, **context):
 class StaticFile:
     # Storage container for aggregating static file info
     storage = {"name": [], "type": [], "source": [], "destination": []}
+    # Sub-folder of the web site root this kind of static file is deployed to.
+    # Note: subclasses override it, which is what keeps their destinations in
+    #       separate namespaces (see the duplicate check in __init__).
+    type = "files"
 
     def __init__(self, name, source, dest=None, handle_duplicate=False):
         """
@@ -1042,11 +1046,8 @@ class StaticFile:
             log.error(msg)
             raise Exception(msg)
         # Attributes
-        self.builder = None
         self.name = name
         self.source = source
-        # Note: following line will be overwritten in subclasses
-        self.type = "files"
         # Fetch existing Builder instance
         self.builder = None
         if Builder.instance:
@@ -1071,7 +1072,11 @@ class StaticFile:
         if filename[0] == "/":
             filename = filename[1:]
         # - checking for duplicates
-        if filename not in self.storage["destination"]:
+        # Note: each type gets its own folder under the web site root, so two
+        #       files only clash when their type matches too. E.g. an Image
+        #       and a Download may both be named 'logo.png'.
+        taken = set(zip(self.storage["type"], self.storage["destination"]))
+        if (self.type, filename) not in taken:
             self.destination = filename
         else:
             if handle_duplicate:  # define unique subfolder
@@ -1079,7 +1084,7 @@ class StaticFile:
             else:
                 msg = (
                     "%s is already in use. Change source name or destination using the 'dest' option"
-                    % filename
+                    % os.path.join(self.type, filename)
                 )
                 log.error(msg)
                 raise Exception(msg)
@@ -1088,7 +1093,6 @@ class StaticFile:
         self.storage["name"].append(name)
         self.storage["source"].append(source)
         self.storage["destination"].append(self.destination)
-        # Note: following line will be overwritten in subclasses
         self.storage["type"].append(self.type)
 
     @property
@@ -1115,6 +1119,9 @@ class StaticFile:
 
 
 class Image(StaticFile):
+    # Deployed to 'website_root/images/' rather than 'website_root/files/'
+    type = "images"
+
     def __init__(self, name, source, dest=None, handle_duplicate=False):
         """
         Dedicated Python class for image static files
@@ -1134,10 +1141,6 @@ class Image(StaticFile):
                 raise an error
         """
         super().__init__(name, source, dest=dest, handle_duplicate=handle_duplicate)
-        # Overwrite StaticFile attributes so that this type of statics end up
-        # in their own folder
-        self.type = "images"
-        self.storage["type"][-1] = self.type
 
     @property
     def html_image(self):
@@ -1151,6 +1154,9 @@ class Image(StaticFile):
 
 
 class Download(StaticFile):
+    # Deployed to 'website_root/downloads/' rather than 'website_root/files/'
+    type = "downloads"
+
     def __init__(self, name, source, dest=None, handle_duplicate=False):
         """
         Dedicated Python class for downloadable static files
@@ -1170,10 +1176,6 @@ class Download(StaticFile):
                 raise an error
         """
         super().__init__(name, source, dest=dest, handle_duplicate=handle_duplicate)
-        # Overwrite StaticFile attributes so that this type of statics end up
-        # in their own folder
-        self.type = "downloads"
-        self.storage["type"][-1] = self.type
 
     @property
     def html_download(self):
