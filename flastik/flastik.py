@@ -35,7 +35,7 @@ class Builder:
         bootstrap_folder=None,
         css_style_sheet=None,
         favicon=None,
-        meta={},
+        meta=None,
         description=None,
         author=None,
         log_level="ERROR",
@@ -109,7 +109,9 @@ class Builder:
             log.error(msg)
             raise Exception(msg)
         # - Backend attributes
-        self.meta = meta
+        # Note: copied so that the caller's dict is not mutated by the
+        #       'description'/'author' shorthands below.
+        self.meta = dict(meta) if meta else {}
         self.favicon = favicon
         self.bootstrap_folder = bootstrap_folder
         self.copy_bootstrap = False
@@ -212,7 +214,7 @@ class Builder:
         log.debug("Found Var.: %s", found)
         # - sanity checks:
         key_args = list(kwargs_deco.keys())
-        if len(found) is not len(key_args):
+        if len(found) != len(key_args):
             msg = (
                 "Number of key variables does not match the number of "
                 f"variables specified in the route: {route}"
@@ -365,7 +367,7 @@ class Builder:
     def build(
         self,
         dest=None,
-        views=[],
+        views=None,
         overwrite=True,
         static_umask=0o655,
         html_umask=0o644,
@@ -421,7 +423,9 @@ class Builder:
                 os.makedirs(dest, dir_umask)
             self.dest = dest
         log.info("Website destination: %s", self.dest)
-        if not isinstance(views, list):
+        if views is None:
+            views = []
+        elif not isinstance(views, list):
             views = [views]
         if not views:
             views = self.web_pages.keys()
@@ -831,7 +835,7 @@ def add_Builder_arguments(arg_parser):
         type=str,
         nargs="?",
         help="""path to bootstrap folder, str.
-                If None (default): a complete distribution of Bootstrap 4.3.1
+                If None (default): a complete distribution of Bootstrap 5.3.3
                     will be used and copied in static_website_root/static at
                     built/deployment
                 Otherwise: specified will be used and linked to""",
@@ -962,7 +966,7 @@ def rst2html(rst_file, **context):
     with open(rst_file, "r") as f:
         rst_string = f.read()
     # Convert rst to html5
-    html_string = publish_parts(rst_string, writer_name="html5")["html_body"]
+    html_string = publish_parts(rst_string, writer="html5")["html_body"]
     # Restore Jinja injections
     html_string = html_string.replace("<p>{{", "{{").replace("}}</p>", "}}")
     html_string = html_string.replace("<p>{%", "{%").replace("%}</p>", "%}")
@@ -1071,7 +1075,7 @@ class StaticFile:
             self.destination = filename
         else:
             if handle_duplicate:  # define unique subfolder
-                self.destination = os.path.join(uuid4(), filename)
+                self.destination = os.path.join(str(uuid4()), filename)
             else:
                 msg = (
                     "%s is already in use. Change source name or destination using the 'dest' option"
@@ -1088,23 +1092,18 @@ class StaticFile:
         self.storage["type"].append(self.type)
 
     @property
-    def url(self, current_route=None):
+    def url(self):
         """
         Return relative path to file during template rendering
-
-        Keyword Args:
-            current_route: path to *.html being built, str.
 
         Returns: relative path, str.
         """
         # Check point: in case this method/class is used outside of
-        #              a flastic projects
-        if not self.builder and not current_route:
+        #              a flastik project
+        if not self.builder:
             msg = (
                 "A flastik.Builder instance must be created beforehand in "
-                "order to use the any Static class.Otherwise you need to "
-                "re-write your template and specify the 'current_route' "
-                "option for each 'url' method's call."
+                "order to use any Static class."
             )
             log.error(msg)
             raise Exception(msg)
@@ -1186,12 +1185,13 @@ class Download(StaticFile):
 
     # TODO: add test for that method
     @property
-    def size(self, precision=1):
+    def size(self):
         """Return a humanized string representation of a given file"""
+        precision = 1
         bytes_size = os.path.getsize(self.source)
         suffixes = ["B", "KB", "MB", "GB", "TB"]
         suffixIndex = 0
-        while bytes_size > 1024:
+        while bytes_size > 1024 and suffixIndex < len(suffixes) - 1:
             suffixIndex += 1  # increment the index of the suffix
             bytes_size = bytes_size / 1024.0  # apply the division
         return "%.*f %s" % (precision, bytes_size, suffixes[suffixIndex])
@@ -1241,7 +1241,9 @@ def collect_static_files(
     elif not static_root:  # Note: user specified dest takes over
         static_root = Builder.instance[0].dest
 
-    if not StaticFile.storage:
+    # Note: 'storage' always holds its four (possibly empty) lists, so the
+    #       emptiness check has to look at one of them rather than the dict.
+    if not StaticFile.storage["source"]:
         print("There is no static files to collect")
         return
     # File Management Strategy

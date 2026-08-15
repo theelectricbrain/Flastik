@@ -18,7 +18,7 @@ def main(args=None):
     """The main routine."""
     if args is None:
         args = sys.argv[1:]
-    log.debug("Args: ", args)
+    log.debug("Args: %s", args)
 
     arg_parser = ArgumentParser()
     # Create line command: flastik create_project NAME => creates standard project structure
@@ -31,8 +31,7 @@ def main(args=None):
     arg_parser.add_argument("--create_doc", dest="create_doc",
                             action="store_true",
                             help="Create the Flastik documentation locally.")
-    arglist = sys.argv[1:]
-    options = arg_parser.parse_args(args=arglist)
+    options = arg_parser.parse_args(args=args)
 
     if options.project:
         project_path = os.path.join(os.getcwd(), options.project)
@@ -66,9 +65,24 @@ def build_project_folder(project_path):
     # Communicate with user
     msg = ("Your %s's project folder has been built.\n"
            "Change directory to %s and run 'python %s -h' to check the "
-           "available options for building/deploying your webiste.") % (
+           "available options for building/deploying your website.") % (
         basename, project_path, file_name)
     print(msg)
+
+
+def escape_doc(obj):
+    """
+    Returns an object's docstring, with angle brackets escaped so that it can
+    be dropped into the documentation templates as-is.
+    Undocumented objects yield an empty string rather than raising.
+
+    Args:
+        obj: any python object, typically a function, method or property.
+
+    Returns: escaped docstring, str.
+    """
+    doc = obj.__doc__ or ""
+    return doc.replace("<", "&lt;").replace(">", "&gt;")
 
 
 def build_doc(doc_path):
@@ -85,7 +99,7 @@ def build_doc(doc_path):
     functions = {}
     for f in [ii for ii in getmembers(flastik, isfunction) if 'flastik' in ii[1].__module__]:
         if f[1].__doc__:
-            functions[f[0]] = f[1].__doc__.replace("<", "&lt;").replace(">", "&gt;")
+            functions[f[0]] = escape_doc(f[1])
     classes = {}
     for c in [ii for ii in getmembers(flastik, isclass) if 'flastik' in ii[1].__module__]:
         classes[c[0]] = {'doc': None}
@@ -93,15 +107,15 @@ def build_doc(doc_path):
         classes[c[0]]['methods'] = {}
         for m in [ii for ii in getmembers(c[1], isfunction)]:
             if "__init__" == m[0]:
-                classes[c[0]]['doc'] = m[1].__doc__.replace("<", "&lt;").replace(">", "&gt;")
+                classes[c[0]]['doc'] = escape_doc(m[1])
             elif "_" == m[0][0]:
                 continue
             else:
-                classes[c[0]]['methods'][m[0]] = m[1].__doc__.replace("<", "&lt;").replace(">", "&gt;")
+                classes[c[0]]['methods'][m[0]] = escape_doc(m[1])
         # List properties
         classes[c[0]]['properties'] = {}
         for p in getmembers(c[1], lambda o: isinstance(o, property)):
-            classes[c[0]]['properties'][p[0]] = p[1].__doc__.replace("<", "&lt;").replace(">", "&gt;")
+            classes[c[0]]['properties'][p[0]] = escape_doc(p[1])
     # Instantiating Builder
     website = flastik.Builder(template_dirs=os.path.join(package_path, 'doc_templates'))
     # Defining some common context
