@@ -227,7 +227,7 @@ def test_image_and_download_may_share_a_name():
 def test_same_type_duplicate_still_raises():
     Builder()
     Image("logo", ICON, dest="logo.png")
-    with pytest.raises(Exception, match="images/logo.png is already in use"):
+    with pytest.raises(Exception, match=r"images/logo\.png is already in use"):
         Image("logo again", ICON, dest="logo.png")
 
 

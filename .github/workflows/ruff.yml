@@ -1,0 +1,33 @@
+name: Lint via Ruff
+
+# Note: pull_request is what covers contributions from forks, which a push
+#       trigger never sees. push is narrowed to master so that a pull request
+#       from a branch in this repo is not built twice over.
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      # Note: the version is pinned on purpose. Ruff adds rules between
+      #       releases, so an unpinned install turns an unrelated push red.
+      #       Bump it here and in .pre-commit-config.yaml together, then run
+      #       'ruff check .' locally before pushing.
+      - name: Install Ruff
+        run: pip install ruff==0.16.0
+      # The rules themselves live in pyproject.toml, so this checks exactly
+      # what developers see locally.
+      - name: Run Ruff
+        run: ruff check --output-format=github .

@@ -102,13 +102,13 @@ class Builder:
         # - Logging scheme
         try:
             log.setLevel(log_level)
-        except ValueError:
+        except ValueError as err:
             msg = (
                 f"{log_level} is not a valid log_level. \n Must be CRITICAL, ERROR,"
                 " WARNING, INFO or DEBUG"
             )
             log.error(msg)
-            raise ValueError(msg)
+            raise ValueError(msg) from err
         log_handler = logging.FileHandler(f"flastik_{log_level}.log")
         log_format = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -734,7 +734,7 @@ class Builder:
         # - otherwise
         else:
             required_keys = []
-            for key_list, group in zip(var_lists, found):
+            for key_list, group in zip(var_lists, found, strict=False):
                 var_name = group[1]
                 #  * first time around
                 if not route_vars:
@@ -760,13 +760,13 @@ class Builder:
                         for rr in old_route_vars:
                             lv = key_list[rr[-1]]
                             for vv in lv:
-                                route_vars.append(rr + [vv])
+                                route_vars.append([*rr, vv])
                         # - resets requirement
                         required_keys = []
                     else:  # List of values
                         for rr in old_route_vars:
                             for vv in key_list:
-                                route_vars.append(rr + [vv])
+                                route_vars.append([*rr, vv])
                         # - defines ramification requirement for dict.
                         required_keys = key_list
             #  * turn inside lists into tuples
@@ -1007,7 +1007,7 @@ def rst2html(rst_file, **context):
 
     Returns: rendered HTML, str.
     """
-    with open(rst_file, "r") as f:
+    with open(rst_file) as f:
         rst_string = f.read()
     # Convert rst to html5
     html_string = publish_parts(rst_string, writer="html5")["html_body"]
@@ -1114,7 +1114,7 @@ class StaticFile:
             zip(
                 self.storage["builder"],
                 self.storage["type"],
-                self.storage["destination"],
+                self.storage["destination"], strict=False,
             )
         )
         if (self.builder, self.type, filename) not in taken:
@@ -1300,7 +1300,7 @@ def collect_static_files(
             StaticFile.storage["source"],
             StaticFile.storage["destination"],
             StaticFile.storage["type"],
-            StaticFile.storage["builder"],
+            StaticFile.storage["builder"], strict=False,
         )
         if owner is builder or owner is None
     ]

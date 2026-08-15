@@ -104,10 +104,10 @@ def build_doc(doc_path):
         classes[c[0]] = {'doc': None}
         # List methods
         classes[c[0]]['methods'] = {}
-        for m in [ii for ii in getmembers(c[1], isfunction)]:
-            if "__init__" == m[0]:
+        for m in getmembers(c[1], isfunction):
+            if m[0] == "__init__":
                 classes[c[0]]['doc'] = escape_doc(m[1])
-            elif "_" == m[0][0]:
+            elif m[0][0] == "_":
                 continue
             else:
                 classes[c[0]]['methods'][m[0]] = escape_doc(m[1])

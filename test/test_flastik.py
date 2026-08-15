@@ -372,7 +372,7 @@ def test_build():
 
 # Tests based on the html so generated
 def test_hello_world():
-    with open(os.path.join(dest, "hello_world.html"), "r") as f:
+    with open(os.path.join(dest, "hello_world.html")) as f:
         hello_world_html = f.read()
 
     assert(hello_world_html == hello_world_str)
@@ -381,7 +381,7 @@ def test_hello_world():
 def test_cruise_report():
     with open(os.path.join(
             dest, ship_list[0], "cruise", str(cruise_dict[ship_list[0]][0]),
-            "index.html"), "r") as f:
+            "index.html")) as f:
         cruise_html = f.read()
     assert(cruise_html == cruise_str)
 
@@ -390,7 +390,7 @@ def test_cruise_n_data():
     with open(os.path.join(
             dest, ship_list[0], "cruise", str(cruise_dict[ship_list[0]][0]),
             "data", "index.html"
-    ), "r") as f:
+    )) as f:
         cruise_n_data_html = f.read()
     assert(cruise_n_data_html == cruise_n_data_str)
 

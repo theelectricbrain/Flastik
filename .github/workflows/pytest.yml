@@ -1,6 +1,12 @@
 name: Run Unit Test via Pytest
 
-on: [push]
+# Note: pull_request is what covers contributions from forks, which a push
+#       trigger never sees. push is narrowed to master so that a pull request
+#       from a branch in this repo is not built twice over.
+on:
+  push:
+    branches: [master]
+  pull_request:
 
 jobs:
   build:
