@@ -246,6 +246,57 @@ def test_handle_duplicate_puts_the_second_file_in_its_own_folder():
     assert len(os.path.dirname(second.destination)) == 36
 
 
+def test_statics_do_not_leak_between_sites(tmp_path):
+    """Regression: collect_static_files() used to deploy every static file
+    ever created, so each site shipped the previous sites' assets."""
+    Builder()
+    Image("first", ICON, dest="first.png")
+    collect_static_files(
+        static_root=str(tmp_path / "first_site"), copy_locally=True)
+
+    Builder()
+    Image("second", ICON, dest="second.png")
+    collect_static_files(
+        static_root=str(tmp_path / "second_site"), copy_locally=True)
+
+    assert os.listdir(tmp_path / "first_site" / "images") == ["first.png"]
+    assert os.listdir(tmp_path / "second_site" / "images") == ["second.png"]
+
+
+def test_each_site_may_reuse_a_file_name():
+    """Regression: two web sites could not each have an images/logo.png."""
+    Builder()
+    first = Image("logo", ICON, dest="logo.png")
+    Builder()
+    second = Image("logo", ICON, dest="logo.png")
+
+    assert first.destination == second.destination == "logo.png"
+    assert first.builder is not second.builder
+
+
+def test_collect_static_files_accepts_an_explicit_builder(tmp_path):
+    """A site may be collected once it is no longer the current one."""
+    first = Builder()
+    Image("first", ICON, dest="first.png")
+    Builder()  # becomes the current Builder
+    Image("second", ICON, dest="second.png")
+
+    collect_static_files(
+        static_root=str(tmp_path / "site"), copy_locally=True, builder=first)
+
+    assert os.listdir(tmp_path / "site" / "images") == ["first.png"]
+
+
+def test_statics_created_before_any_builder_are_still_collected(tmp_path):
+    """StaticFile does not require a Builder; those files have no site of
+    their own and go wherever they are collected."""
+    StaticFile("early", ICON, dest="early.png")
+    assert StaticFile.storage["builder"] == [None]
+
+    collect_static_files(static_root=str(tmp_path / "site"), copy_locally=True)
+    assert (tmp_path / "site" / "files" / "early.png").is_file()
+
+
 def test_collect_static_files_reports_when_there_is_nothing(tmp_path, capsys):
     """Regression: the guard tested the storage dict, which is never empty,
     so this branch was unreachable."""

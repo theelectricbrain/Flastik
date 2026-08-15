@@ -1037,7 +1037,10 @@ def render_template(template_name, **context):
 # Library for "static files"...as in other files than html and bootstrap related
 class StaticFile:
     # Storage container for aggregating static file info
-    storage = {"name": [], "type": [], "source": [], "destination": []}
+    # Note: 'builder' records the web site each file belongs to, so that two
+    #       Builders neither collide with nor collect each other's statics.
+    #       It is None for files created before any Builder existed.
+    storage = {"name": [], "type": [], "source": [], "destination": [], "builder": []}
     # Sub-folder of the web site root this kind of static file is deployed to.
     # Note: subclasses override it, which is what keeps their destinations in
     #       separate namespaces (see the duplicate check in __init__).
@@ -1092,11 +1095,18 @@ class StaticFile:
         if filename[0] == "/":
             filename = filename[1:]
         # - checking for duplicates
-        # Note: each type gets its own folder under the web site root, so two
-        #       files only clash when their type matches too. E.g. an Image
-        #       and a Download may both be named 'logo.png'.
-        taken = set(zip(self.storage["type"], self.storage["destination"]))
-        if (self.type, filename) not in taken:
+        # Note: each web site gets its own root, and each type its own folder
+        #       underneath, so two files only clash when both match. E.g. an
+        #       Image and a Download may both be named 'logo.png', and so may
+        #       the Images of two different Builders.
+        taken = set(
+            zip(
+                self.storage["builder"],
+                self.storage["type"],
+                self.storage["destination"],
+            )
+        )
+        if (self.builder, self.type, filename) not in taken:
             self.destination = filename
         else:
             if handle_duplicate:  # define unique subfolder
@@ -1114,6 +1124,7 @@ class StaticFile:
         self.storage["source"].append(source)
         self.storage["destination"].append(self.destination)
         self.storage["type"].append(self.type)
+        self.storage["builder"].append(self.builder)
 
     @property
     def url(self):
@@ -1226,11 +1237,12 @@ def collect_static_files(
     copy_locally=False,
     file_umask=0o644,
     folder_umask=0o755,
+    builder=None,
     **kwargs,
 ):
     """
-    Collects all StaticFile's (and Child classes') instances and deploy them at
-    the web site root directory
+    Collects the StaticFile's (and Child classes') instances belonging to one
+    web site and deploys them at its root directory
 
     Keyword Args:
         static_root: path to site root directory, str.
@@ -1242,6 +1254,10 @@ def collect_static_files(
           If False (default): symlinks will be used instead
         file_umask: u-mask for files, Operating-system mode bitfield.
         folder_umask: u-mask for static folders, Operating-system mode bitfield.
+        builder: the Builder whose static files should be collected, Builder.
+          If None (default): the current Builder is used (see Builder.current).
+          Only relevant to projects building several web sites in one go, which
+          should collect each site's statics right after building it.
     """
     # Sanity check
     if isinstance(file_umask, str):
@@ -1263,17 +1279,27 @@ def collect_static_files(
     elif not static_root:  # Note: user specified dest takes over
         static_root = Builder.current().dest
 
-    # Note: 'storage' always holds its four (possibly empty) lists, so the
-    #       emptiness check has to look at one of them rather than the dict.
-    if not StaticFile.storage["source"]:
+    # Select the static files belonging to this web site
+    # Note: files registered before any Builder existed have no web site of
+    #       their own, so they go wherever they are collected.
+    if builder is None and Builder.instance:
+        builder = Builder.current()
+    selected = [
+        (src, dst, tp)
+        for src, dst, tp, owner in zip(
+            StaticFile.storage["source"],
+            StaticFile.storage["destination"],
+            StaticFile.storage["type"],
+            StaticFile.storage["builder"],
+        )
+        if owner is builder or owner is None
+    ]
+    if not selected:
         print("There is no static files to collect")
         return
     # File Management Strategy
-    sources = StaticFile.storage["source"]
-    destinations = StaticFile.storage["destination"]
-    types = StaticFile.storage["type"]
     # - Make folder architecture
-    for src, dst, tp in zip(sources, destinations, types):
+    for src, dst, tp in selected:
         # - making separated folder for Image, Download and StaticFile instances
         dst = os.path.join(static_root, tp, dst)
         dir_name = os.path.dirname(dst)
