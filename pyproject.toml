@@ -4,17 +4,24 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flastik"
-version = "1.0.3"
+dynamic = ["version"]
 description = "A Flask-like Tiny-framework for static websites"
 readme = "README.md"
 authors = [
     { name = "Dr. Thomas Roc", email = "info@electricbrain.fr" }
 ]
-requires-python = ">=3.6"
-dependencies = ["jinja2", "docutils", "pytest"]
+requires-python = ">=3.10"
+dependencies = ["jinja2", "docutils"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+docs = ["reportlab"]
 
 [project.scripts]
-flastik = "scripts.flastik:main"
+flastik = "flastik.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "flastik.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -26,8 +33,7 @@ flastik = [
     "LICENSE.txt",
     "base_templates/*",
     "doc_templates/*",
+    "bootstrap/BOOTSTRAP_LICENSE",
     "bootstrap/css/*",
-    "bootstrap/popper/*",
-    "bootstrap/jquery/*",
     "bootstrap/js/*",
 ]

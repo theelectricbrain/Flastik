@@ -5,7 +5,7 @@ Flastik - A Flask-like Tiny-framework for static websites.
 """
 
 # Meta
-__version__ = '1.0'
+__version__ = '1.0.3'
 __description__ = 'A Flask-like Tiny-framework for static websites'
 __author__ = 'Dr. Thomas Roc'
 __author_email__ = 'info@electricbrain.fr'

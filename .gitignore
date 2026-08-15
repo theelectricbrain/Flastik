@@ -1,21 +1,18 @@
 *.pyc
+__pycache__/
 .eggs/
 /dist/
-django_helpdesk.egg-info
-demo/*.egg-info
-demo/demodesk/*.sqlite3
-docs/html/*
-docs/doctrees/*
+build/
+*.egg-info/
 .coverage
+.pytest_cache/
+.tox/**
+.venv
 .project
 .pydevproject
 .directory
-*.swp
 .idea
-.tox/**
-.venv
+*.swp
 
 # flastik specific
-build/*
-flastik.egg-info/*
 flastik_ERROR.log
