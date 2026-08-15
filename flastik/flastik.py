@@ -48,7 +48,7 @@ class Builder:
         websites.
 
         Keyword Args:
-            templates: path to template folder, str.
+            template_dirs: path to template folder (or list of paths), str.
                 Your templates are added to the "base templates" provided in
                 the package (see README.pdf)
 
@@ -808,7 +808,7 @@ def add_Builder_arguments(arg_parser):
     )
     arg_parser.add_argument(
         "--templates",
-        dest="templates",
+        dest="template_dirs",
         type=str,
         nargs="?",
         help="path to template folder, str. "

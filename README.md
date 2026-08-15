@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/theelectricbrain/Flastik.svg?branch=master)](https://travis-ci.org/theelectricbrain/Flastik)
+[![Pytest](https://github.com/theelectricbrain/Flastik/actions/workflows/pytest.yml/badge.svg)](https://github.com/theelectricbrain/Flastik/actions/workflows/pytest.yml)
 
-[![Pytest](https://github.com/theelectricbrain/Flastik/actions/workflows/pytest.yml/badge.svg)](https://github.com/theelectricbrain/Flastik/actions/workflows/pytest.yml)<p align="center">
+<p align="center">
    <img align="middle" src='https://raw.githubusercontent.com/theelectricbrain/Flastik/master/flastik/base_templates/default_icon.png' width='250' height='250'>
 </p>
 
@@ -22,13 +22,10 @@ collect_static_files function).
 ## Installation
 In order to install Flastik:
  * Change directory to the Flastik code base
- * Run `pip install .`, or `python setup.py install` if you don’t 
-   have pip installed on your work station, to install the package 
-   (or `sudo python setup.py install`/`sudo pip install .` if root 
-   permission is required)
- * Finally run `python setup.py test` to test the sanity of the 
-   package installation (or `sudo python setup.py test` if root 
-   permission is required)
+ * Run `pip install .` to install the package (or `sudo pip install .` 
+   if root permission is required)
+ * Finally run `pip install ".[test]"` followed by `pytest` to test the 
+   sanity of the package installation
 
 ## Usage
 Once Flastik installed, run `flastik --create_doc` from a command

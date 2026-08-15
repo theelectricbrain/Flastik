@@ -103,7 +103,7 @@ def build_doc(doc_path):
         for p in getmembers(c[1], lambda o: isinstance(o, property)):
             classes[c[0]]['properties'][p[0]] = p[1].__doc__.replace("<", "&lt;").replace(">", "&gt;")
     # Instantiating Builder
-    website = flastik.Builder(templates=os.path.join(package_path, 'doc_templates'))
+    website = flastik.Builder(template_dirs=os.path.join(package_path, 'doc_templates'))
     # Defining some common context
     context = {
         'project_name': 'Flastik',
