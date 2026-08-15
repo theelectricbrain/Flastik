@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019-2026. See LICENSE for details.
@@ -14,6 +13,7 @@ __license__ = 'GNU GPLv3'
 from .flastik import (
     Builder,
     Download,
+    FlastikError,
     Image,
     StaticFile,
     add_build_arguments,
@@ -30,6 +30,7 @@ from .flastik import (
 __all__ = [
     "Builder",
     "Download",
+    "FlastikError",
     "Image",
     "StaticFile",
     "add_Builder_arguments",

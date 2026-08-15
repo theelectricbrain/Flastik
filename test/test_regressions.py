@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019-2026. See LICENSE for details.

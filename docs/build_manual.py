@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019-2026. See LICENSE for details.
@@ -48,7 +47,7 @@ def get_version():
     with open(init_py) as f:
         match = re.search(r"^__version__\s*=\s*['\"]([^'\"]+)['\"]", f.read(), re.MULTILINE)
     if not match:
-        raise RuntimeError("Could not find __version__ in %s" % init_py)
+        raise RuntimeError(f"Could not find __version__ in {init_py}")
     return match.group(1)
 
 
@@ -178,7 +177,7 @@ def build():
         TARGET, pagesize=letter,
         leftMargin=inch, rightMargin=inch,
         topMargin=inch, bottomMargin=inch,
-        title="Flastik %s - Specifications, Syntax & Patterns" % version,
+        title=f"Flastik {version} - Specifications, Syntax & Patterns",
         author="Dr. Thomas Roc")
 
     frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="normal")
@@ -189,7 +188,7 @@ def build():
 
     story = [
         Spacer(1, 2 * inch),
-        Paragraph("Flastik %s" % version, styles["CoverTitle"]),
+        Paragraph(f"Flastik {version}", styles["CoverTitle"]),
         Paragraph("Specifications, Syntax &amp; Patterns", styles["CoverSubTitle"]),
         Spacer(1, 0.4 * inch),
         Paragraph("A tiny-framework for static website design", styles["CoverSubTitle"]),
@@ -212,7 +211,7 @@ def build():
 
     # multiBuild resolves the table of contents' page numbers.
     doc.multiBuild(story)
-    print("Wrote %s (version %s)" % (TARGET, version))
+    print(f"Wrote {TARGET} (version {version})")
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ import re
 import shutil
 import sys
 from functools import wraps
+from typing import ClassVar
 from uuid import uuid4
 
 from docutils.core import publish_parts
@@ -18,6 +19,15 @@ from jinja2 import Environment, FileSystemLoader
 
 # Standard logging
 log = logging.getLogger(__name__)
+
+
+class FlastikError(Exception):
+    """
+    Raised for every error Flastik reports itself.
+
+    Note: it derives from Exception, so code catching Exception -- as every
+          Flastik release used to require -- keeps working unchanged.
+    """
 
 
 class Builder:
@@ -28,7 +38,7 @@ class Builder:
     # Note: everything describing a particular web site -- its views, routes
     #       and rendering position -- lives on the instance instead, so that
     #       two Builders never see each other's pages.
-    instance = []
+    instance: ClassVar[list] = []
     # Builder being rendered, if any. Set by build() so that a view calling
     # render_template() resolves to the Builder doing the building, even when
     # a more recent Builder exists.
@@ -94,12 +104,12 @@ class Builder:
             log.setLevel(log_level)
         except ValueError:
             msg = (
-                "%s is not a valid log_level. \n Must be CRITICAL, ERROR,"
+                f"{log_level} is not a valid log_level. \n Must be CRITICAL, ERROR,"
                 " WARNING, INFO or DEBUG"
-            ) % log_level
+            )
             log.error(msg)
             raise ValueError(msg)
-        log_handler = logging.FileHandler("flastik_%s.log" % log_level)
+        log_handler = logging.FileHandler(f"flastik_{log_level}.log")
         log_format = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
@@ -139,7 +149,7 @@ class Builder:
             Use default option 'use_package_templates=True'
             Or/and provide a valid path to templates via the 'templates' option."""
             log.error(msg)
-            raise Exception(msg)
+            raise FlastikError(msg)
         self.jinja_env = Environment(
             loader=loader,
             # Note: autoescape stops you from injecting str into template
@@ -209,7 +219,7 @@ class Builder:
                     f"please change '{html_name}'"
                 )
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             route = route.replace(html_name, "")
         # Generate routes and associated iterator
         # - base route
@@ -227,15 +237,15 @@ class Builder:
                 f"variables specified in the route: {route}"
             )
             log.error(msg)
-            raise Exception(msg)
+            raise FlastikError(msg)
         # - check if names are similar between route and kwargs_deco
-        if not [t[1] for t in found] == key_args:
+        if [t[1] for t in found] != key_args:
             msg = (
                 "There is a mismatch in the naming or the order between "
                 f"the kwargs and the variables specify in {route}"
             )
             log.error(msg)
-            raise Exception(msg)
+            raise FlastikError(msg)
         # - generate list of route variables
         route_vars = []
         if found:
@@ -255,10 +265,10 @@ class Builder:
             else:
                 msg = (
                     "Change route pattern and/or variables: "
-                    "%s already used by another view"
-                ) % new_route
+                    f"{new_route} already used by another view"
+                )
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
 
         def wrapper(func):
             @wraps(func)
@@ -275,15 +285,15 @@ class Builder:
                         "This name is reserved for the jinja environment."
                     )
                     log.error(msg)
-                    raise Exception(msg)
+                    raise FlastikError(msg)
                 # - check if corresponding amount of variables
-                if not len(key_args) == len(args):
+                if len(key_args) != len(args):
                     msg = (
-                        "Number of variables in %s does not match the number"
+                        f"Number of variables in {func.__name__} does not match the number"
                         " of variables specified in the route"
-                    ) % func.__name__
+                    )
                     log.error(msg)
-                    raise Exception(msg)
+                    raise FlastikError(msg)
                 # FIXME: Check if names are matching between kwargs_deco and args
                 #        Dunno how to do that !? Don't think it is possible !
                 # if not key_args == list(args):
@@ -295,10 +305,10 @@ class Builder:
                 return func(*args, **kwargs)
 
             # Store function in Builder
-            if func.__name__ in self.web_pages.keys():
-                msg = "'%s' is already used for another view function" % func.__name__
+            if func.__name__ in self.web_pages:
+                msg = f"'{func.__name__}' is already used for another view function"
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             self.web_pages[func.__name__] = {
                 "route_pattern": route_pattern,
                 "html_name": html_name,
@@ -345,20 +355,20 @@ class Builder:
             if "filename" not in key_args:
                 msg = "'filename' needs to be specify when using 'static' in url_for"
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             path = os.path.join("static", kwargs["filename"])  # for now
         # Views
-        elif name in self.web_pages.keys():
+        elif name in self.web_pages:
             # get url for that particular view
             # - checking key args
             orig_key_args = self.web_pages[name]["key_args"]
-            if not key_args == orig_key_args:
+            if key_args != orig_key_args:
                 msg = (
-                    "Error: key args need to match %s's original key_args."
-                    "\nOrig.: %s\nGiven: %s"
-                ) % (name, orig_key_args, key_args)
+                    f"Error: key args need to match {name}'s original key_args."
+                    f"\nOrig.: {orig_key_args}\nGiven: {key_args}"
+                )
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             path = self.web_pages[name]["route_pattern"] % tuple(kwargs.values())
             path = os.path.join(path, self.web_pages[name]["html_name"])
         else:
@@ -462,9 +472,9 @@ class Builder:
         # - Copy bootstrap
         if self.copy_bootstrap:
             if not os.path.exists(self.bootstrap_folder):
-                msg = "'%s' does not exist." % self.bootstrap_folder
+                msg = f"'{self.bootstrap_folder}' does not exist."
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             for ff in os.listdir(self.bootstrap_folder):
                 orig = os.path.join(self.bootstrap_folder, ff)
                 dest = os.path.join(self.static_path, ff)
@@ -477,18 +487,18 @@ class Builder:
                 elif os.path.isdir(orig):
                     try:
                         shutil.copytree(orig, dest)
-                    except FileExistsError as err:
+                    except FileExistsError:
                         if self.overwrite:  # force overwriting
                             shutil.rmtree(dest)
                             shutil.copytree(orig, dest)
                             log.debug("Copying %s to %s", orig, dest)
                         else:
-                            raise err
+                            raise
         # - Copy CSS style sheet
         if not os.path.exists(self.css_style_sheet):
-            msg = "'%s' does not exist." % self.css_style_sheet
+            msg = f"'{self.css_style_sheet}' does not exist."
             log.error(msg)
-            raise Exception(msg)
+            raise FlastikError(msg)
         dest = os.path.join(self.static_path, "stylesheet.css")
         if os.path.exists(dest) and not self.overwrite:
             pass
@@ -505,9 +515,9 @@ class Builder:
         self.css_style_sheet = dest
         # - Copy favicon.ico
         if not os.path.exists(self.favicon):
-            msg = "'%s' does not exist." % self.favicon
+            msg = f"'{self.favicon}' does not exist."
             log.error(msg)
-            raise Exception(msg)
+            raise FlastikError(msg)
         dest = os.path.join(self.static_path, "favicon.ico")
         if os.path.exists(dest) and not self.overwrite:
             pass
@@ -582,7 +592,7 @@ class Builder:
                 "in order to use this function."
             )
             log.error(msg)
-            raise Exception(msg)
+            raise FlastikError(msg)
         return cls.instance[-1]
 
     # Static Methods
@@ -604,14 +614,14 @@ class Builder:
 
         """
         # Checking uniformity
-        types = set([type(n) for n in var_val])
+        types = {type(n) for n in var_val}
         if len(types) != 1:
             msg = (
                 f"Error type in {var_name} list. Only list of uniform values are"
                 f"supported.\nE.g. route: {route}; types: {[str(type(vv)) for vv in var_val]}"
             )
             log.error(msg)
-            raise Exception(msg)
+            raise FlastikError(msg)
 
         if list not in types:
             if var_type == "string" and not all(isinstance(n, str) for n in var_val):
@@ -620,21 +630,21 @@ class Builder:
                     f"list of str.\nE.g. Var.: {var_name} ; route: {route}"
                 )
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             elif var_type == "int" and not all(isinstance(n, int) for n in var_val):
                 msg = (
                     f"Error type in {var_name} values. 'int' type only valid for list of int."
                     f"\nE.g. Var.: {var_name} ; route: {route}"
                 )
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             elif var_type == "float" and not all(isinstance(n, float) for n in var_val):
                 msg = (
                     f"Error type in {var_name} values. 'float' type only valid for list of floats."
                     f"\nE.g. Var.: {var_name} ; route: {route}"
                 )
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             # FIXME: not sure if I need that check !?
             elif var_type == "path" and not all(os.path.exists(n) for n in var_val):
                 msg = (
@@ -642,7 +652,7 @@ class Builder:
                     f"\nE.g. Var.: {var_name} ; route: {route}"
                 )
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             elif var_type not in ["string", "int", "float", "path"]:
                 msg = (
                     f"'{var_type}' type in {var_name} is not supported. "
@@ -650,7 +660,7 @@ class Builder:
                     f"\nE.g. Var. Type: {var_type} ; Var.: {var_name} ; route: {route}"
                 )
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             else:
                 # - Trimming white spaces beforehand
                 if var_type in ["string", "path"]:
@@ -702,7 +712,7 @@ class Builder:
             if not isinstance(values, (list, dict)):
                 msg = f"Error type: {group[1]} variable must be a list or a dict."
                 log.error(msg)
-                raise Exception(msg)
+                raise TypeError(msg)
             var_type = group[0]
             var_name = group[1]
             # - check if dealing with a dict of lists
@@ -730,11 +740,10 @@ class Builder:
                 if not route_vars:
                     if isinstance(key_list, dict):  # Dict of list
                         msg = (
-                            "'%s' dict requires %s to be defined just before in the url."
-                            % (var_name, key_list.keys())
+                            f"'{var_name}' dict requires {key_list.keys()} to be defined just before in the url."
                         )
                         log.error(msg)
-                        raise Exception(msg)
+                        raise FlastikError(msg)
                     else:  # List of values
                         route_vars = [[vv] for vv in key_list]
                     required_keys = key_list
@@ -744,14 +753,10 @@ class Builder:
                     route_vars = []
                     if isinstance(key_list, dict):  # Dict of list
                         # Dict keys must match previous ramification
-                        if not set(key_list.keys()) == set(required_keys):  # Sanity check
-                            msg = "'%s' dict. requires %s as keys and not %s." % (
-                                var_name,
-                                required_keys,
-                                key_list.keys(),
-                            )
+                        if set(key_list.keys()) != set(required_keys):  # Sanity check
+                            msg = f"'{var_name}' dict. requires {required_keys} as keys and not {key_list.keys()}."
                             log.error(msg)
-                            raise Exception(msg)
+                            raise FlastikError(msg)
                         for rr in old_route_vars:
                             lv = key_list[rr[-1]]
                             for vv in lv:
@@ -795,21 +800,21 @@ def check_url_for_unsafe_characters(url):
     unsafe = {'"', "<", ">", "#", "%", "{", "}", "|", "^", "~", "[", "]", "`", " "}
     found = unsafe.intersection(set(url))
     if found:
-        msg = "%s is an unsafe url.\n'%s' should not be used." % (url, ", ".join(found))
+        msg = "{} is an unsafe url.\n'{}' should not be used.".format(url, ", ".join(found))
         log.error(msg)
-        raise Exception(msg)
+        raise FlastikError(msg)
 
 
 def check_path_for_illegal_characters(path):
     unsafe = {".", '"', "[", "]", ":", ";", "|", "=", " ", "?", "$"}
     found = unsafe.intersection(set(path))
     if found:
-        msg = "%s is an illegal path.\n'%s' should not be used." % (
+        msg = "{} is an illegal path.\n'{}' should not be used.".format(
             path,
             ", ".join(found),
         )
         log.error(msg)
-        raise Exception(msg)
+        raise FlastikError(msg)
 
 
 def apply_umasks(path, dir_umask, file_umask):
@@ -1041,7 +1046,13 @@ class StaticFile:
     # Note: 'builder' records the web site each file belongs to, so that two
     #       Builders neither collide with nor collect each other's statics.
     #       It is None for files created before any Builder existed.
-    storage = {"name": [], "type": [], "source": [], "destination": [], "builder": []}
+    storage: ClassVar[dict] = {
+        "name": [],
+        "type": [],
+        "source": [],
+        "destination": [],
+        "builder": [],
+    }
     # Sub-folder of the web site root this kind of static file is deployed to.
     # Note: subclasses override it, which is what keeps their destinations in
     #       separate namespaces (see the duplicate check in __init__).
@@ -1068,9 +1079,9 @@ class StaticFile:
         # Sanity check
         source = os.path.abspath(source)
         if not os.path.isfile(source):
-            msg = "%s either does not exist or is not a file." % source
+            msg = f"{source} either does not exist or is not a file."
             log.error(msg)
-            raise Exception(msg)
+            raise FlastikError(msg)
         # Attributes
         self.name = name
         self.source = source
@@ -1082,13 +1093,12 @@ class StaticFile:
             filename = os.path.basename(source)
         elif os.path.splitext(dest)[-1]:  # is the file name specified in dest?
             # sanity check
-            if not os.path.splitext(dest)[-1] == os.path.splitext(source)[-1]:
+            if os.path.splitext(dest)[-1] != os.path.splitext(source)[-1]:
                 msg = (
-                    "Source and destination must have the same extension: %s ~= %s"
-                    % (source, dest)
+                    f"Source and destination must have the same extension: {source} ~= {dest}"
                 )
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
             filename = dest
         else:
             filename = os.path.join(dest, os.path.basename(source))
@@ -1114,11 +1124,10 @@ class StaticFile:
                 self.destination = os.path.join(str(uuid4()), filename)
             else:
                 msg = (
-                    "%s is already in use. Change source name or destination using the 'dest' option"
-                    % os.path.join(self.type, filename)
+                    f"{os.path.join(self.type, filename)} is already in use. Change source name or destination using the 'dest' option"
                 )
                 log.error(msg)
-                raise Exception(msg)
+                raise FlastikError(msg)
         log.info("File Name & Destination: %s & %s", filename, self.destination)
         # - aggregating static file info
         self.storage["name"].append(name)
@@ -1142,7 +1151,7 @@ class StaticFile:
                 "order to use any Static class."
             )
             log.error(msg)
-            raise Exception(msg)
+            raise FlastikError(msg)
         # - make relative path to where it got called
         dest = os.path.join(self.type, self.destination)
         relative_path = os.path.relpath(dest, self.builder.current_route)
@@ -1179,7 +1188,7 @@ class Image(StaticFile):
         """
         Returns html formatted image block
         """
-        img = '<img src="%s" class="img-fluid" alt="%s">' % (self.url, self.name)
+        img = f'<img src="{self.url}" class="img-fluid" alt="{self.name}">'
         return img
 
     # TODO: add similar templating methods specific to images below
@@ -1214,7 +1223,7 @@ class Download(StaticFile):
         """
         Returns html formatted downloadable block
         """
-        d_link = "<a href='%s' download>%s</a>" % (self.url, self.name)
+        d_link = f"<a href='{self.url}' download>{self.name}</a>"
         return d_link
 
     # TODO: add test for that method
@@ -1228,7 +1237,7 @@ class Download(StaticFile):
         while bytes_size > 1024 and suffixIndex < len(suffixes) - 1:
             suffixIndex += 1  # increment the index of the suffix
             bytes_size = bytes_size / 1024.0  # apply the division
-        return "%.*f %s" % (precision, bytes_size, suffixes[suffixIndex])
+        return f"{bytes_size:.{precision}f} {suffixes[suffixIndex]}"
 
     # TODO: add similar templating methods specific to downloads below
 
@@ -1276,7 +1285,7 @@ def collect_static_files(
             "destination via the 'dest' option."
         )
         log.error(msg)
-        raise Exception(msg)
+        raise FlastikError(msg)
     elif not static_root:  # Note: user specified dest takes over
         static_root = Builder.current().dest
 

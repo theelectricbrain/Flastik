@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019-2026. See LICENSE for details.
@@ -351,21 +350,20 @@ def test_build():
     @website.route("/<string:ship>/cruise/<int:cruise_id>/", ship=ship_list, cruise_id=cruise_dict)
     def cruise_report(ship, cruise_id):
         context['dwnld'] = ""
-        context['title'] = "%s: Cruise %s" % (ship, cruise_id)
+        context['title'] = f"{ship}: Cruise {cruise_id}"
         # Testing "url_for" call from view
         context['navbar_links'][0]['url'] = website.url_for('hello_world')
-        context['body_text'] = '<h2>This cruise %s. Hail to the %s !</h2>' % (cruise_id, ship)
+        context['body_text'] = f'<h2>This cruise {cruise_id}. Hail to the {ship} !</h2>'
         return render_template('test.html', **context)
 
     @website.route("/<string:ship>/cruise/<int:cruise_id>/<string:folder_name>/",
                    ship=ship_list, cruise_id=cruise_dict, folder_name=['data', 'report'])
     def cruise_n_data(ship, cruise_id, folder_name):
         context['dwnld'] = ""
-        context['title'] = "%s - %s" % (folder_name, ship)
+        context['title'] = f"{folder_name} - {ship}"
         # Testing "url_for" call from view
         context['navbar_links'][0]['url'] = website.url_for('hello_world')
-        context['body_text'] = "<h2>Welcome to the %s folder for the %s cruise of the %s</h2>" % (
-            folder_name, cruise_id, ship)
+        context['body_text'] = f"<h2>Welcome to the {folder_name} folder for the {cruise_id} cruise of the {ship}</h2>"
         return render_template('test.html', **context)
 
     website.build(dest=dest)

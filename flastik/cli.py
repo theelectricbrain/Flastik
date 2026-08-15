@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019-2026. See LICENSE for details.
@@ -64,10 +63,9 @@ def build_project_folder(project_path):
     with open(os.path.join(project_path, file_name), 'w') as f:
         f.write(builder_template)
     # Communicate with user
-    msg = ("Your %s's project folder has been built.\n"
-           "Change directory to %s and run 'python %s -h' to check the "
-           "available options for building/deploying your website.") % (
-        basename, project_path, file_name)
+    msg = (f"Your {basename}'s project folder has been built.\n"
+           f"Change directory to {project_path} and run 'python {file_name} -h' to check the "
+           "available options for building/deploying your website.")
     print(msg)
 
 
@@ -166,8 +164,8 @@ def build_doc(doc_path):
     flastik.collect_static_files()
     # Communicate with user
     msg = ("Flastik's documentation website has been built.\n"
-           "Change directory to %s and open flastik.html with your favorite "
-           "web browser.") % doc_path
+           f"Change directory to {doc_path} and open flastik.html with your favorite "
+           "web browser.")
     print(msg)
 
 
