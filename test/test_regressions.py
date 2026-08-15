@@ -16,8 +16,7 @@ import sys
 import pytest
 
 import flastik
-import flastik.cli as cli
-from flastik import Builder, Download, Image, collect_static_files, render_template
+from flastik import Builder, Download, Image, cli, collect_static_files, render_template
 from flastik.flastik import StaticFile
 
 # Note: resolved off the installed package, so these tests do not care which

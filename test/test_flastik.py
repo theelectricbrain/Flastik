@@ -6,14 +6,21 @@ Flastik - A Flask-like Tiny-framework for static websites.
 import os
 import shutil
 from argparse import ArgumentParser
-# Templating imports
-from flastik import Builder, render_template, rst2html
-# Static files imports
-from flastik import Image, Download, collect_static_files
-# Argument parsers imports
-from flastik import (add_Builder_arguments, add_build_arguments,
-                     add_collect_static_files_arguments)
 
+# Templating imports
+# Static files imports
+# Argument parsers imports
+from flastik import (
+    Builder,
+    Download,
+    Image,
+    add_build_arguments,
+    add_Builder_arguments,
+    add_collect_static_files_arguments,
+    collect_static_files,
+    render_template,
+    rst2html,
+)
 
 # General context for navbar and footer
 dest = "test_build"

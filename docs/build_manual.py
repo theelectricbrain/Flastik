@@ -46,7 +46,7 @@ def get_version():
     """Reads __version__ out of flastik/__init__.py without importing it."""
     init_py = os.path.join(REPO, "flastik", "__init__.py")
     with open(init_py) as f:
-        match = re.search(r"^__version__\s*=\s*['\"]([^'\"]+)['\"]", f.read(), re.M)
+        match = re.search(r"^__version__\s*=\s*['\"]([^'\"]+)['\"]", f.read(), re.MULTILINE)
     if not match:
         raise RuntimeError("Could not find __version__ in %s" % init_py)
     return match.group(1)

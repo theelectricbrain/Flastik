@@ -3,13 +3,14 @@
 Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019-2026. See LICENSE for details.
 """
-import os
-import sys
-import shutil
 import logging
+import os
+import shutil
+import sys
 from argparse import ArgumentParser
+from inspect import getmembers, isclass, isfunction
+
 import flastik
-from inspect import getmembers, isfunction, isclass
 
 # Standard logging
 log = logging.getLogger(__name__)

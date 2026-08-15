@@ -4,16 +4,17 @@ Flastik - A Flask-like Tiny-framework for static websites.
 """
 
 # Imports
+import itertools
+import logging
 import os
 import re
-import sys
 import shutil
-import logging
-import itertools
+import sys
 from functools import wraps
-from jinja2 import Environment, FileSystemLoader
-from docutils.core import publish_parts
 from uuid import uuid4
+
+from docutils.core import publish_parts
+from jinja2 import Environment, FileSystemLoader
 
 # Standard logging
 log = logging.getLogger(__name__)
