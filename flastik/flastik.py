@@ -20,13 +20,18 @@ log = logging.getLogger(__name__)
 
 
 class Builder:
-    # Tracking page being rendered
-    current_route = None
-    # instance tracker
+    # Registry of every Builder created, oldest first. The last entry is the
+    # "current" Builder: the one the module level helpers (render_template,
+    # rst2html, collect_static_files) and the StaticFile classes bind to,
+    # in the way Flask resolves current_app. See Builder.current().
+    # Note: everything describing a particular web site -- its views, routes
+    #       and rendering position -- lives on the instance instead, so that
+    #       two Builders never see each other's pages.
     instance = []
-    # Container for web page = view + var(s) + route pattern + key args. + html name
-    web_pages = {}
-    routes = []
+    # Builder being rendered, if any. Set by build() so that a view calling
+    # render_template() resolves to the Builder doing the building, even when
+    # a more recent Builder exists.
+    _rendering = None
 
     def __init__(
         self,
@@ -101,13 +106,14 @@ class Builder:
         if log.level <= 20:
             log.addHandler(logging.StreamHandler(sys.stdout))
         log_handler.setFormatter(log_format)
-        # - Check: only one instance per project
-        if not self.instance:
-            self.instance.append(self)
-        else:
-            msg = "only one instance of Builder can be created per project."
-            log.error(msg)
-            raise Exception(msg)
+        # - Per web site state
+        # Container for web page = view + var(s) + route pattern + key args. + html name
+        self.web_pages = {}
+        self.routes = []
+        # Tracking page being rendered
+        self.current_route = None
+        # - Register as the current Builder
+        Builder.instance.append(self)
         # - Backend attributes
         # Note: copied so that the caller's dict is not mutated by the
         #       'description'/'author' shorthands below.
@@ -520,31 +526,63 @@ class Builder:
         apply_umasks(self.static_path, self.dir_umask, self.static_umask)
 
         # - Render Templates
-        # IMPROVE_ME: add progress bar here
-        for name in views:
-            route_pattern = self.web_pages[name]["route_pattern"]
-            route_vars = self.web_pages[name]["route_vars"]
-            html_name = self.web_pages[name]["html_name"]
-            view = self.web_pages[name]["view"]
-            if not route_vars:
-                #  * inform current page being renderer (for url_for purposes)
-                route = route_pattern
-                self.current_route = route
-                #  * then render
-                rendered_html = view()
-                #  * finally write to html file
-                log.info("Writting %s at %s/%s", html_name, self.dest, route)
-                self._write_html_file(html_name, route, rendered_html)
-            else:
-                for vv in route_vars:
+        # Note: the views are about to call render_template(), which binds to
+        #       the current Builder. Make that this one for the duration of
+        #       the build, in case another Builder has been created since.
+        previously_rendering = Builder._rendering
+        Builder._rendering = self
+        try:
+            # IMPROVE_ME: add progress bar here
+            for name in views:
+                route_pattern = self.web_pages[name]["route_pattern"]
+                route_vars = self.web_pages[name]["route_vars"]
+                html_name = self.web_pages[name]["html_name"]
+                view = self.web_pages[name]["view"]
+                if not route_vars:
                     #  * inform current page being renderer (for url_for purposes)
-                    route = route_pattern % vv
+                    route = route_pattern
                     self.current_route = route
                     #  * then render
-                    rendered_html = view(*vv)
+                    rendered_html = view()
                     #  * finally write to html file
                     log.info("Writting %s at %s/%s", html_name, self.dest, route)
                     self._write_html_file(html_name, route, rendered_html)
+                else:
+                    for vv in route_vars:
+                        #  * inform current page being renderer (for url_for purposes)
+                        route = route_pattern % vv
+                        self.current_route = route
+                        #  * then render
+                        rendered_html = view(*vv)
+                        #  * finally write to html file
+                        log.info("Writting %s at %s/%s", html_name, self.dest, route)
+                        self._write_html_file(html_name, route, rendered_html)
+        finally:
+            Builder._rendering = previously_rendering
+
+    # Class Methods
+    @classmethod
+    def current(cls):
+        """
+        Returns the Builder that the module level helpers and the StaticFile
+        classes bind to: the one being built if a build is under way,
+        otherwise the most recently created one.
+
+        Note: projects only ever create a single Builder, in which case this
+              simply returns it.
+
+        Returns: Builder instance
+        """
+        if cls._rendering is not None:
+            return cls._rendering
+        if not cls.instance:
+            msg = (
+                "A flastik.Builder instance must be created beforehand "
+                "in order to use this function."
+            )
+            log.error(msg)
+            raise Exception(msg)
+        return cls.instance[-1]
 
     # Static Methods
     @staticmethod
@@ -971,16 +1009,8 @@ def rst2html(rst_file, **context):
     html_string = html_string.replace("<p>{{", "{{").replace("}}</p>", "}}")
     html_string = html_string.replace("<p>{%", "{%").replace("%}</p>", "%}")
     # Use Jinja variables and logics
-    # Fetch existing Builder instance
-    if not Builder.instance:
-        msg = (
-            "A flastik.Builder instance must be created beforehand "
-            "in order to use 'render_template'."
-        )
-        log.error(msg)
-        raise Exception(msg)
-    else:
-        jinja_env = Builder.instance[0].jinja_env
+    # Fetch the Builder this call belongs to
+    jinja_env = Builder.current().jinja_env
     str_template = jinja_env.from_string(html_string)
 
     return str_template.render(**context)
@@ -997,16 +1027,8 @@ def render_template(template_name, **context):
         **context: dictionary of templating variables, dict.
           Ex.: context = {'var_name_1': var_val_1,...,'var_name_N': var_val_N}
     """
-    # Fetch existing Builder instance
-    if not Builder.instance:
-        msg = (
-            "A flastik.Builder instance must be created beforehand "
-            "in order to use 'render_template'."
-        )
-        log.error(msg)
-        raise Exception(msg)
-    else:
-        jinja_env = Builder.instance[0].jinja_env
+    # Fetch the Builder this call belongs to
+    jinja_env = Builder.current().jinja_env
     # Get template through jinja template env/loader
     template = jinja_env.get_template(template_name)
     return template.render(**context)
@@ -1048,10 +1070,8 @@ class StaticFile:
         # Attributes
         self.name = name
         self.source = source
-        # Fetch existing Builder instance
-        self.builder = None
-        if Builder.instance:
-            self.builder = Builder.instance[0]
+        # Fetch the Builder this static file belongs to, if any
+        self.builder = Builder.current() if Builder.instance else None
         # File Management Strategy
         # - define destination
         if not dest:
@@ -1241,7 +1261,7 @@ def collect_static_files(
         log.error(msg)
         raise Exception(msg)
     elif not static_root:  # Note: user specified dest takes over
-        static_root = Builder.instance[0].dest
+        static_root = Builder.current().dest
 
     # Note: 'storage' always holds its four (possibly empty) lists, so the
     #       emptiness check has to look at one of them rather than the dict.
