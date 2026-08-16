@@ -5,6 +5,8 @@ __pycache__/
 build/
 *.egg-info/
 .coverage
+coverage.xml
+htmlcov/
 .pytest_cache/
 .tox/**
 .venv

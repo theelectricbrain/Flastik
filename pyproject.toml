@@ -44,6 +44,25 @@ ignore = [
     "TRY400",
 ]
 
+[tool.coverage.run]
+# Without an explicit source, coverage measures whatever happens to get
+# imported -- including unrelated packages sitting in the environment -- and
+# the resulting percentage says nothing about this project.
+source = ["flastik"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+# A floor, not a target: set to where the suite actually sits today (71%) with
+# a point of slack for measurement drift across the Python matrix. Raise it
+# when coverage rises; never lower it to make a red build go green.
+fail_under = 70
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+
 [tool.setuptools.dynamic]
 version = { attr = "flastik.__version__" }
 
