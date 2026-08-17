@@ -83,7 +83,6 @@ def make_styles():
 def escape(text):
     """Escapes the handful of characters ReportLab treats as markup."""
     text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    # `code` -> monospace
     return re.sub(r"`([^`]+)`", r'<font face="Courier">\1</font>', text)
 
 
@@ -129,7 +128,6 @@ def parse(markdown, styles):
         elif not stripped:
             flush()
         elif bullet:
-            # Continuation line of the current bullet.
             bullet.append(stripped)
         else:
             paragraph.append(stripped)
@@ -196,7 +194,6 @@ def build():
         Paragraph(COPYRIGHT, styles["CoverSubTitle"]),
         NextPageTemplate("body"),
         PageBreak(),
-        # Deliberately not styled "H1": afterFlowable would list it in itself.
         Paragraph("Table of Contents", styles["TOCTitle"]),
     ]
 
@@ -209,7 +206,6 @@ def build():
     story.append(PageBreak())
     story.extend(parse(markdown, styles))
 
-    # multiBuild resolves the table of contents' page numbers.
     doc.multiBuild(story)
     print(f"Wrote {TARGET} (version {version})")
 

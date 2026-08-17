@@ -1,8 +1,5 @@
 name: Run Unit Test via Pytest
 
-# Note: pull_request is what covers contributions from forks, which a push
-#       trigger never sees. push is narrowed to master so that a pull request
-#       from a branch in this repo is not built twice over.
 on:
   push:
     branches: [master]
@@ -29,10 +26,6 @@ jobs:
       - name: Test with pytest
         run: |
           coverage run -m pytest -v -s
-      # Note: the report is written out before the threshold is checked, so a
-      #       build that fails the floor still shows which lines are uncovered.
-      #       --fail-under=0 overrides the configured floor for these steps
-      #       only; the gate below is what actually enforces it.
       - name: Publish Coverage Report
         if: always()
         run: |
@@ -50,9 +43,6 @@ jobs:
           name: coverage-${{ matrix.python-version }}
           path: coverage.xml
           if-no-files-found: error
-      # Note: the floor lives in pyproject.toml ([tool.coverage.report]
-      #       fail_under) so that a local `coverage report` enforces the same
-      #       number CI does.
       - name: Enforce Coverage Floor
         run: |
           coverage report

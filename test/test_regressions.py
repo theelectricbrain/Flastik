@@ -18,8 +18,6 @@ import flastik
 from flastik import Builder, Download, Image, cli, collect_static_files, render_template
 from flastik.flastik import StaticFile
 
-# Note: resolved off the installed package, so these tests do not care which
-#       directory pytest was started from.
 PACKAGE_PATH = os.path.dirname(os.path.abspath(flastik.__file__))
 ICON = os.path.join(PACKAGE_PATH, "base_templates", "default_icon.png")
 
@@ -34,7 +32,6 @@ def reset_state():
     Builder._rendering = None
     for values in StaticFile.storage.values():
         values.clear()
-    # Builder.__init__ attaches a fresh file handler every time
     log = logging.getLogger("flastik.flastik")
     for handler in list(log.handlers):
         log.removeHandler(handler)
@@ -91,8 +88,6 @@ def test_views_do_not_leak_between_builders():
 
 
 def test_routes_do_not_leak_between_builders():
-    # Note: only routes carrying variables are recorded in 'routes'; a
-    #       static route expands to nothing to iterate over.
     first = Builder()
     second = Builder()
 
@@ -149,7 +144,6 @@ def test_url_for_is_resolved_against_its_own_builder():
         return ""
 
     assert first.url_for("a_page") == os.path.join("deep", "page.html")
-    # 'second' knows nothing of that view
     assert second.url_for("a_page") is None
 
 
@@ -211,7 +205,6 @@ def test_route_rejects_mismatched_variable_count():
         website.route("/<string:ship>/<int:cruise_id>/", ship=["a"])
 
 
-# Static files
 def test_image_and_download_may_share_a_name():
     """Separate deployment folders mean the destinations do not clash."""
     Builder()
@@ -240,7 +233,6 @@ def test_handle_duplicate_puts_the_second_file_in_its_own_folder():
     assert first.destination == "logo.png"
     assert second.destination != first.destination
     assert os.path.basename(second.destination) == "logo.png"
-    # ...namely a uuid4 sub-folder
     assert len(os.path.dirname(second.destination)) == 36
 
 
@@ -317,7 +309,6 @@ def test_download_size_stops_at_the_largest_suffix(tmp_path, monkeypatch):
     assert download.size.endswith(" TB")
 
 
-# Command line interface
 def test_main_uses_its_argument_rather_than_sys_argv(tmp_path, monkeypatch):
     """Regression: main() accepted 'args' but then re-read sys.argv."""
     monkeypatch.chdir(tmp_path)

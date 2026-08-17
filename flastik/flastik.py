@@ -31,17 +31,7 @@ class FlastikError(Exception):
 
 
 class Builder:
-    # Registry of every Builder created, oldest first. The last entry is the
-    # "current" Builder: the one the module level helpers (render_template,
-    # rst2html, collect_static_files) and the StaticFile classes bind to,
-    # in the way Flask resolves current_app. See Builder.current().
-    # Note: everything describing a particular web site -- its views, routes
-    #       and rendering position -- lives on the instance instead, so that
-    #       two Builders never see each other's pages.
     instance: ClassVar[list] = []
-    # Builder being rendered, if any. Set by build() so that a view calling
-    # render_template() resolves to the Builder doing the building, even when
-    # a more recent Builder exists.
     _rendering = None
 
     def __init__(
@@ -117,17 +107,12 @@ class Builder:
         if log.level <= 20:
             log.addHandler(logging.StreamHandler(sys.stdout))
         log_handler.setFormatter(log_format)
-        # - Per web site state
-        # Container for web page = view + var(s) + route pattern + key args. + html name
         self.web_pages = {}
         self.routes = []
-        # Tracking page being rendered
         self.current_route = None
         # - Register as the current Builder
         Builder.instance.append(self)
         # - Backend attributes
-        # Note: copied so that the caller's dict is not mutated by the
-        #       'description'/'author' shorthands below.
         self.meta = dict(meta) if meta else {}
         self.favicon = favicon
         self.bootstrap_folder = bootstrap_folder
@@ -560,18 +545,14 @@ class Builder:
                     self._write_html_file(html_name, route, rendered_html)
                 else:
                     for vv in route_vars:
-                        #  * inform current page being renderer (for url_for purposes)
                         route = route_pattern % vv
                         self.current_route = route
-                        #  * then render
                         rendered_html = view(*vv)
-                        #  * finally write to html file
                         log.info("Writting %s at %s/%s", html_name, self.dest, route)
                         self._write_html_file(html_name, route, rendered_html)
         finally:
             Builder._rendering = previously_rendering
 
-    # Class Methods
     @classmethod
     def current(cls):
         """
@@ -1015,7 +996,6 @@ def rst2html(rst_file, **context):
     html_string = html_string.replace("<p>{{", "{{").replace("}}</p>", "}}")
     html_string = html_string.replace("<p>{%", "{%").replace("%}</p>", "%}")
     # Use Jinja variables and logics
-    # Fetch the Builder this call belongs to
     jinja_env = Builder.current().jinja_env
     str_template = jinja_env.from_string(html_string)
 
@@ -1033,7 +1013,6 @@ def render_template(template_name, **context):
         **context: dictionary of templating variables, dict.
           Ex.: context = {'var_name_1': var_val_1,...,'var_name_N': var_val_N}
     """
-    # Fetch the Builder this call belongs to
     jinja_env = Builder.current().jinja_env
     # Get template through jinja template env/loader
     template = jinja_env.get_template(template_name)
@@ -1085,7 +1064,6 @@ class StaticFile:
         # Attributes
         self.name = name
         self.source = source
-        # Fetch the Builder this static file belongs to, if any
         self.builder = Builder.current() if Builder.instance else None
         # File Management Strategy
         # - define destination
@@ -1143,8 +1121,6 @@ class StaticFile:
 
         Returns: relative path, str.
         """
-        # Check point: in case this method/class is used outside of
-        #              a flastik project
         if not self.builder:
             msg = (
                 "A flastik.Builder instance must be created beforehand in "
@@ -1160,7 +1136,6 @@ class StaticFile:
 
 
 class Image(StaticFile):
-    # Deployed to 'website_root/images/' rather than 'website_root/files/'
     type = "images"
 
     def __init__(self, name, source, dest=None, handle_duplicate=False):
@@ -1195,7 +1170,6 @@ class Image(StaticFile):
 
 
 class Download(StaticFile):
-    # Deployed to 'website_root/downloads/' rather than 'website_root/files/'
     type = "downloads"
 
     def __init__(self, name, source, dest=None, handle_duplicate=False):
@@ -1289,9 +1263,6 @@ def collect_static_files(
     elif not static_root:  # Note: user specified dest takes over
         static_root = Builder.current().dest
 
-    # Select the static files belonging to this web site
-    # Note: files registered before any Builder existed have no web site of
-    #       their own, so they go wherever they are collected.
     if builder is None and Builder.instance:
         builder = Builder.current()
     selected = [

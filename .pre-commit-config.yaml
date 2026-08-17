@@ -1,13 +1,4 @@
-# Install with:
-#     pip install pre-commit
-#     pre-commit install
-#
-# Run against everything without committing:
-#     pre-commit run --all-files
 repos:
-  # Note: keep this revision in step with the pinned version in
-  #       .github/workflows/ruff.yml, so a commit that passes here also
-  #       passes CI. The rules come from pyproject.toml either way.
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.0
     hooks:
@@ -15,9 +6,6 @@ repos:
 
   - repo: local
     hooks:
-      # Note: run through the interpreter doing the committing, because the
-      #       suite imports flastik and its dependencies. Set that up once
-      #       with 'pip install -e ".[test]"'.
       - id: pytest
         name: pytest
         entry: python -m pytest -q
