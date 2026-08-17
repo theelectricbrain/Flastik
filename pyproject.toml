@@ -26,36 +26,18 @@ flastik = "flastik.cli:main"
 target-version = "py310"
 
 [tool.ruff.lint]
-# Pinned explicitly: without it, "does ruff pass" depends on whichever ruff
-# version happens to be installed, so CI and developer machines disagree.
-# Note: pycodestyle is limited to its E4/E7/E9 subset, and W is left out on
-#       purpose. test_flastik.py compares rendered pages against golden HTML
-#       whose trailing whitespace is significant (see commit f527d4d), and
-#       line length rules would fight those same long literals.
 select = ["E4", "E7", "E9", "F", "I", "UP", "B", "SIM", "C4", "RUF", "TRY", "EXE"]
 ignore = [
-    # Flastik's error messages are contextual (which route, which file, which
-    # variable), so they belong at the raise site rather than baked into an
-    # exception class.
     "TRY003",
-    # Several handlers log conditions they anticipate -- SameFileError when a
-    # static file is already in place, for instance. The message is the
-    # signal there; a full traceback would only be noise.
     "TRY400",
 ]
 
 [tool.coverage.run]
-# Without an explicit source, coverage measures whatever happens to get
-# imported -- including unrelated packages sitting in the environment -- and
-# the resulting percentage says nothing about this project.
 source = ["flastik"]
 branch = true
 
 [tool.coverage.report]
 show_missing = true
-# A floor, not a target: set to where the suite actually sits today (71%) with
-# a point of slack for measurement drift across the Python matrix. Raise it
-# when coverage rises; never lower it to make a red build go green.
 fail_under = 70
 exclude_also = [
     "if TYPE_CHECKING:",
