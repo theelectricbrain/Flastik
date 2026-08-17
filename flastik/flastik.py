@@ -431,9 +431,14 @@ class Builder:
             views = [views]
         if not views:
             views = self.web_pages.keys()
+        page_count = sum(
+            len(self.web_pages[name]["route_vars"]) if self.web_pages[name]["route_vars"] else 1
+            for name in views
+        )
+        total = 2 * page_count
+        done = 0
         # Building static website:
         # - Make website dirs
-        # IMPROVE_ME: add progress bar here
         for name in views:
             route_pattern = self.web_pages[name]["route_pattern"]
             route_vars = self.web_pages[name]["route_vars"]
@@ -449,6 +454,8 @@ class Builder:
                         self.dir_umask = int(self.dir_umask, 8)
                     os.makedirs(full_path, self.dir_umask)
                     log.debug("Making %s", full_path)
+                done += 1
+                self._report_progress(done, total)
         # - Make 'static' folder & move static files where they belong
         self.static_path = os.path.join(self.dest, "static")
         if not os.path.exists(self.static_path):
@@ -528,21 +535,19 @@ class Builder:
         previously_rendering = Builder._rendering
         Builder._rendering = self
         try:
-            # IMPROVE_ME: add progress bar here
             for name in views:
                 route_pattern = self.web_pages[name]["route_pattern"]
                 route_vars = self.web_pages[name]["route_vars"]
                 html_name = self.web_pages[name]["html_name"]
                 view = self.web_pages[name]["view"]
                 if not route_vars:
-                    #  * inform current page being renderer (for url_for purposes)
                     route = route_pattern
                     self.current_route = route
-                    #  * then render
                     rendered_html = view()
-                    #  * finally write to html file
                     log.info("Writting %s at %s/%s", html_name, self.dest, route)
                     self._write_html_file(html_name, route, rendered_html)
+                    done += 1
+                    self._report_progress(done, total)
                 else:
                     for vv in route_vars:
                         route = route_pattern % vv
@@ -550,8 +555,24 @@ class Builder:
                         rendered_html = view(*vv)
                         log.info("Writting %s at %s/%s", html_name, self.dest, route)
                         self._write_html_file(html_name, route, rendered_html)
+                        done += 1
+                        self._report_progress(done, total)
         finally:
             Builder._rendering = previously_rendering
+
+    @staticmethod
+    def _report_progress(done, total, width=30):
+        '''
+        This is the progress bar
+        '''
+        if not total:
+            return
+        filled = int(width * done / total)
+        bar = "#" * filled + "-" * (width - filled)
+        sys.stdout.write(f"\rBuilding [{bar}] {done}/{total}")
+        sys.stdout.flush()
+        if done == total:
+            sys.stdout.write("\n")
 
     @classmethod
     def current(cls):
