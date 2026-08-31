@@ -12,6 +12,7 @@ because that is all manual.md uses. Run it with:
     pip install reportlab
     python docs/build_manual.py
 """
+
 import os
 import re
 import sys
@@ -45,7 +46,9 @@ def get_version():
     """Reads __version__ out of flastik/__init__.py without importing it."""
     init_py = os.path.join(REPO, "flastik", "__init__.py")
     with open(init_py) as f:
-        match = re.search(r"^__version__\s*=\s*['\"]([^'\"]+)['\"]", f.read(), re.MULTILINE)
+        match = re.search(
+            r"^__version__\s*=\s*['\"]([^'\"]+)['\"]", f.read(), re.MULTILINE
+        )
     if not match:
         raise RuntimeError(f"Could not find __version__ in {init_py}")
     return match.group(1)
@@ -53,30 +56,85 @@ def get_version():
 
 def make_styles():
     styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(
-        name="CoverTitle", parent=styles["Title"], fontSize=24, leading=30,
-        spaceAfter=36))
-    styles.add(ParagraphStyle(
-        name="CoverSubTitle", parent=styles["Normal"], fontSize=14, leading=20,
-        alignment=TA_CENTER))
-    styles.add(ParagraphStyle(
-        name="H1", parent=styles["Heading1"], fontSize=16, leading=20,
-        spaceBefore=18, spaceAfter=10))
-    styles.add(ParagraphStyle(
-        name="H2", parent=styles["Heading2"], fontSize=13, leading=17,
-        spaceBefore=14, spaceAfter=8))
-    styles.add(ParagraphStyle(
-        name="TOCTitle", parent=styles["Heading1"], fontSize=16, leading=20,
-        spaceBefore=18, spaceAfter=10))
-    styles.add(ParagraphStyle(
-        name="Body", parent=styles["BodyText"], fontSize=10.5, leading=14,
-        spaceAfter=8))
-    styles.add(ParagraphStyle(
-        name="ListItem", parent=styles["BodyText"], fontSize=10.5, leading=14,
-        leftIndent=18, bulletIndent=6, spaceAfter=4))
-    styles.add(ParagraphStyle(
-        name="CodeBlock", parent=styles["Code"], fontSize=8.5, leading=10.5,
-        leftIndent=12, spaceBefore=6, spaceAfter=10))
+    styles.add(
+        ParagraphStyle(
+            name="CoverTitle",
+            parent=styles["Title"],
+            fontSize=24,
+            leading=30,
+            spaceAfter=36,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="CoverSubTitle",
+            parent=styles["Normal"],
+            fontSize=14,
+            leading=20,
+            alignment=TA_CENTER,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="H1",
+            parent=styles["Heading1"],
+            fontSize=16,
+            leading=20,
+            spaceBefore=18,
+            spaceAfter=10,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="H2",
+            parent=styles["Heading2"],
+            fontSize=13,
+            leading=17,
+            spaceBefore=14,
+            spaceAfter=8,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="TOCTitle",
+            parent=styles["Heading1"],
+            fontSize=16,
+            leading=20,
+            spaceBefore=18,
+            spaceAfter=10,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="Body",
+            parent=styles["BodyText"],
+            fontSize=10.5,
+            leading=14,
+            spaceAfter=8,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="ListItem",
+            parent=styles["BodyText"],
+            fontSize=10.5,
+            leading=14,
+            leftIndent=18,
+            bulletIndent=6,
+            spaceAfter=4,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="CodeBlock",
+            parent=styles["Code"],
+            fontSize=8.5,
+            leading=10.5,
+            leftIndent=12,
+            spaceBefore=6,
+            spaceAfter=10,
+        )
+    )
     return styles
 
 
@@ -100,8 +158,9 @@ def parse(markdown, styles):
             story.append(Paragraph(escape(" ".join(paragraph)), styles["Body"]))
             del paragraph[:]
         if bullet:
-            story.append(Paragraph(
-                escape(" ".join(bullet)), styles["ListItem"], bulletText="•"))
+            story.append(
+                Paragraph(escape(" ".join(bullet)), styles["ListItem"], bulletText="•")
+            )
             del bullet[:]
 
     while index < len(lines):
@@ -172,24 +231,32 @@ def build():
     styles = make_styles()
 
     doc = ManualTemplate(
-        TARGET, pagesize=letter,
-        leftMargin=inch, rightMargin=inch,
-        topMargin=inch, bottomMargin=inch,
+        TARGET,
+        pagesize=letter,
+        leftMargin=inch,
+        rightMargin=inch,
+        topMargin=inch,
+        bottomMargin=inch,
         title=f"Flastik {version} - Specifications, Syntax & Patterns",
-        author="Dr. Thomas Roc")
+        author="Dr. Thomas Roc",
+    )
 
     frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="normal")
-    doc.addPageTemplates([
-        PageTemplate(id="cover", frames=[frame]),
-        PageTemplate(id="body", frames=[frame], onPage=decorate),
-    ])
+    doc.addPageTemplates(
+        [
+            PageTemplate(id="cover", frames=[frame]),
+            PageTemplate(id="body", frames=[frame], onPage=decorate),
+        ]
+    )
 
     story = [
         Spacer(1, 2 * inch),
         Paragraph(f"Flastik {version}", styles["CoverTitle"]),
         Paragraph("Specifications, Syntax &amp; Patterns", styles["CoverSubTitle"]),
         Spacer(1, 0.4 * inch),
-        Paragraph("A tiny-framework for static website design", styles["CoverSubTitle"]),
+        Paragraph(
+            "A tiny-framework for static website design", styles["CoverSubTitle"]
+        ),
         Spacer(1, 2 * inch),
         Paragraph(COPYRIGHT, styles["CoverSubTitle"]),
         NextPageTemplate("body"),

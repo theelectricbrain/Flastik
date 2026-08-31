@@ -2,6 +2,7 @@
 Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019-2026. See LICENSE for details.
 """
+
 import os
 import shutil
 from argparse import ArgumentParser
@@ -24,12 +25,15 @@ from flastik import (
 # General context for navbar and footer
 dest = "test_build"
 context = {
-    'project_name': 'project_name',
-    'navbar_links': [
-        {'name': 'home', 'url': "?"},
-        {'name': 'test', 'url': 'https://github.com/theelectricbrain'},
+    "project_name": "project_name",
+    "navbar_links": [
+        {"name": "home", "url": "?"},
+        {"name": "test", "url": "https://github.com/theelectricbrain"},
     ],
-    'footer_link': {'name': 'Flastik - Copyright 2019-2026', 'url': 'https://github.com/theelectricbrain'},
+    "footer_link": {
+        "name": "Flastik - Copyright 2019-2026",
+        "url": "https://github.com/theelectricbrain",
+    },
 }
 
 ship_list = ["Shippy-MacShipface", "Boatty-MacBoatface"]
@@ -321,12 +325,13 @@ def test_build():
 
     website = Builder()
 
-    img = Image("Default Icon",
-                os.path.join(website.package_path, "base_templates/default_icon.png"),
-                dest="test/something_else.png")
+    img = Image(
+        "Default Icon",
+        os.path.join(website.package_path, "base_templates/default_icon.png"),
+        dest="test/something_else.png",
+    )
 
-    dwnld = Download("README",
-                     os.path.join(website.package_path, "README.pdf"))
+    dwnld = Download("README", os.path.join(website.package_path, "README.pdf"))
 
     # An Image and a Download may share a file name: they are deployed to
     # separate folders, so their destinations do not collide.
@@ -336,35 +341,43 @@ def test_build():
 
     @website.route("/hello_world.html")
     def hello_world():
-        context['img'] = img
-        context['dwnld'] = dwnld
-        context['title'] = "Hello World !"
-        context['body_text'] = rst2html("./test/test_restructured_text.rst")
+        context["img"] = img
+        context["dwnld"] = dwnld
+        context["title"] = "Hello World !"
+        context["body_text"] = rst2html("./test/test_restructured_text.rst")
         pattern = "\n<br><a href='%s/cruise/%s/report/index.html'>%s: report for cruise %s</a>"
         for ship in ship_list:
             cruises = cruise_dict[ship]
             for cruise_id in cruises:
-                context['body_text'] += pattern % (ship, cruise_id, ship, cruise_id)
-        return render_template('test.html', **context)
+                context["body_text"] += pattern % (ship, cruise_id, ship, cruise_id)
+        return render_template("test.html", **context)
 
-    @website.route("/<string:ship>/cruise/<int:cruise_id>/", ship=ship_list, cruise_id=cruise_dict)
+    @website.route(
+        "/<string:ship>/cruise/<int:cruise_id>/", ship=ship_list, cruise_id=cruise_dict
+    )
     def cruise_report(ship, cruise_id):
-        context['dwnld'] = ""
-        context['title'] = f"{ship}: Cruise {cruise_id}"
+        context["dwnld"] = ""
+        context["title"] = f"{ship}: Cruise {cruise_id}"
         # Testing "url_for" call from view
-        context['navbar_links'][0]['url'] = website.url_for('hello_world')
-        context['body_text'] = f'<h2>This cruise {cruise_id}. Hail to the {ship} !</h2>'
-        return render_template('test.html', **context)
+        context["navbar_links"][0]["url"] = website.url_for("hello_world")
+        context["body_text"] = f"<h2>This cruise {cruise_id}. Hail to the {ship} !</h2>"
+        return render_template("test.html", **context)
 
-    @website.route("/<string:ship>/cruise/<int:cruise_id>/<string:folder_name>/",
-                   ship=ship_list, cruise_id=cruise_dict, folder_name=['data', 'report'])
+    @website.route(
+        "/<string:ship>/cruise/<int:cruise_id>/<string:folder_name>/",
+        ship=ship_list,
+        cruise_id=cruise_dict,
+        folder_name=["data", "report"],
+    )
     def cruise_n_data(ship, cruise_id, folder_name):
-        context['dwnld'] = ""
-        context['title'] = f"{folder_name} - {ship}"
+        context["dwnld"] = ""
+        context["title"] = f"{folder_name} - {ship}"
         # Testing "url_for" call from view
-        context['navbar_links'][0]['url'] = website.url_for('hello_world')
-        context['body_text'] = f"<h2>Welcome to the {folder_name} folder for the {cruise_id} cruise of the {ship}</h2>"
-        return render_template('test.html', **context)
+        context["navbar_links"][0]["url"] = website.url_for("hello_world")
+        context["body_text"] = (
+            f"<h2>Welcome to the {folder_name} folder for the {cruise_id} cruise of the {ship}</h2>"
+        )
+        return render_template("test.html", **context)
 
     website.build(dest=dest)
     collect_static_files()
@@ -375,42 +388,54 @@ def test_hello_world():
     with open(os.path.join(dest, "hello_world.html")) as f:
         hello_world_html = f.read()
 
-    assert(hello_world_html == hello_world_str)
+    assert hello_world_html == hello_world_str
 
 
 def test_cruise_report():
-    with open(os.path.join(
-            dest, ship_list[0], "cruise", str(cruise_dict[ship_list[0]][0]),
-            "index.html")) as f:
+    with open(
+        os.path.join(
+            dest,
+            ship_list[0],
+            "cruise",
+            str(cruise_dict[ship_list[0]][0]),
+            "index.html",
+        )
+    ) as f:
         cruise_html = f.read()
-    assert(cruise_html == cruise_str)
+    assert cruise_html == cruise_str
 
 
 def test_cruise_n_data():
-    with open(os.path.join(
-            dest, ship_list[0], "cruise", str(cruise_dict[ship_list[0]][0]),
-            "data", "index.html"
-    )) as f:
+    with open(
+        os.path.join(
+            dest,
+            ship_list[0],
+            "cruise",
+            str(cruise_dict[ship_list[0]][0]),
+            "data",
+            "index.html",
+        )
+    ) as f:
         cruise_n_data_html = f.read()
-    assert(cruise_n_data_html == cruise_n_data_str)
+    assert cruise_n_data_html == cruise_n_data_str
 
 
 # Testing excepted static file locations
 def test_static():
-    assert(os.path.exists(os.path.join(dest, "static", "stylesheet.css")))
-    assert (os.path.exists(os.path.join(dest, "static", "favicon.ico")))
-    assert (os.path.exists(os.path.join(dest, "static", "css", "bootstrap.min.css")))
-    assert (os.path.exists(os.path.join(dest, "static", "js", "bootstrap.bundle.min.js")))
+    assert os.path.exists(os.path.join(dest, "static", "stylesheet.css"))
+    assert os.path.exists(os.path.join(dest, "static", "favicon.ico"))
+    assert os.path.exists(os.path.join(dest, "static", "css", "bootstrap.min.css"))
+    assert os.path.exists(os.path.join(dest, "static", "js", "bootstrap.bundle.min.js"))
 
 
 def test_images():
-    assert(os.path.exists(os.path.join(dest, "images", "test", "something_else.png")))
-    assert(os.path.exists(os.path.join(dest, "images", "shared_name.png")))
+    assert os.path.exists(os.path.join(dest, "images", "test", "something_else.png"))
+    assert os.path.exists(os.path.join(dest, "images", "shared_name.png"))
 
 
 def test_downloads():
-    assert(os.path.exists(os.path.join(dest, "downloads", "README.pdf")))
-    assert(os.path.exists(os.path.join(dest, "downloads", "shared_name.png")))
+    assert os.path.exists(os.path.join(dest, "downloads", "README.pdf"))
+    assert os.path.exists(os.path.join(dest, "downloads", "shared_name.png"))
     # Keep that at the end
     shutil.rmtree(dest)
 

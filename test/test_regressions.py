@@ -8,6 +8,7 @@ test_flastik.py does not exercise. Each test here stands on its own: the
 Builder and StaticFile keep, so these can be run individually and in any
 order.
 """
+
 import logging
 import os
 import sys
@@ -241,13 +242,11 @@ def test_statics_do_not_leak_between_sites(tmp_path):
     ever created, so each site shipped the previous sites' assets."""
     Builder()
     Image("first", ICON, dest="first.png")
-    collect_static_files(
-        static_root=str(tmp_path / "first_site"), copy_locally=True)
+    collect_static_files(static_root=str(tmp_path / "first_site"), copy_locally=True)
 
     Builder()
     Image("second", ICON, dest="second.png")
-    collect_static_files(
-        static_root=str(tmp_path / "second_site"), copy_locally=True)
+    collect_static_files(static_root=str(tmp_path / "second_site"), copy_locally=True)
 
     assert os.listdir(tmp_path / "first_site" / "images") == ["first.png"]
     assert os.listdir(tmp_path / "second_site" / "images") == ["second.png"]
@@ -272,7 +271,8 @@ def test_collect_static_files_accepts_an_explicit_builder(tmp_path):
     Image("second", ICON, dest="second.png")
 
     collect_static_files(
-        static_root=str(tmp_path / "site"), copy_locally=True, builder=first)
+        static_root=str(tmp_path / "site"), copy_locally=True, builder=first
+    )
 
     assert os.listdir(tmp_path / "site" / "images") == ["first.png"]
 
@@ -305,7 +305,7 @@ def test_download_size_stops_at_the_largest_suffix(tmp_path, monkeypatch):
     target = tmp_path / "huge.bin"
     target.write_bytes(b"\0")
     download = Download("huge", str(target))
-    monkeypatch.setattr(os.path, "getsize", lambda _: 1024 ** 6)
+    monkeypatch.setattr(os.path, "getsize", lambda _: 1024**6)
     assert download.size.endswith(" TB")
 
 

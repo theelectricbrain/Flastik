@@ -4,11 +4,11 @@ Flastik - A Flask-like Tiny-framework for static websites.
 """
 
 # Meta
-__version__ = '1.0.3'
-__description__ = 'A Flask-like Tiny-framework for static websites'
-__author__ = 'Dr. Thomas Roc'
-__author_email__ = 'info@electricbrain.fr'
-__license__ = 'GNU GPLv3'
+__version__ = "1.0.3"
+__description__ = "A Flask-like Tiny-framework for static websites"
+__author__ = "Dr. Thomas Roc"
+__author_email__ = "info@electricbrain.fr"
+__license__ = "GNU GPLv3"
 
 from .flastik import (
     Builder,
@@ -43,4 +43,3 @@ __all__ = [
     "render_template",
     "rst2html",
 ]
-

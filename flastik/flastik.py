@@ -188,7 +188,9 @@ class Builder:
         """
         # Note: boiler plate inspired by
         #       https://realpython.com/primer-on-python-decorators/#more-real-world-examples
-        log.debug(f"route: {route}", )
+        log.debug(
+            f"route: {route}",
+        )
         log.debug(f"deco kwargs: {kwargs_deco}")
         # Regular expression for generic <type:var>
         reg_expr = r"<\s*?(\b\w+\b)\s*?:\s*?(\b\w+\b)\s*?>"
@@ -432,7 +434,9 @@ class Builder:
         if not views:
             views = self.web_pages.keys()
         page_count = sum(
-            len(self.web_pages[name]["route_vars"]) if self.web_pages[name]["route_vars"] else 1
+            len(self.web_pages[name]["route_vars"])
+            if self.web_pages[name]["route_vars"]
+            else 1
             for name in views
         )
         total = 2 * page_count
@@ -562,9 +566,9 @@ class Builder:
 
     @staticmethod
     def _report_progress(done, total, width=30):
-        '''
+        """
         This is the progress bar
-        '''
+        """
         if not total:
             return
         filled = int(width * done / total)
@@ -688,7 +692,6 @@ class Builder:
 
         return FileSystemLoader(search_path)
 
-
     def _generate_route_vars(self, found, kwargs_deco, route):
         """
         Generate the variables associated with a routing pattern.
@@ -741,9 +744,7 @@ class Builder:
                 #  * first time around
                 if not route_vars:
                     if isinstance(key_list, dict):  # Dict of list
-                        msg = (
-                            f"'{var_name}' dict requires {key_list.keys()} to be defined just before in the url."
-                        )
+                        msg = f"'{var_name}' dict requires {key_list.keys()} to be defined just before in the url."
                         log.error(msg)
                         raise FlastikError(msg)
                     else:  # List of values
@@ -802,7 +803,9 @@ def check_url_for_unsafe_characters(url):
     unsafe = {'"', "<", ">", "#", "%", "{", "}", "|", "^", "~", "[", "]", "`", " "}
     found = unsafe.intersection(set(url))
     if found:
-        msg = "{} is an unsafe url.\n'{}' should not be used.".format(url, ", ".join(found))
+        msg = "{} is an unsafe url.\n'{}' should not be used.".format(
+            url, ", ".join(found)
+        )
         log.error(msg)
         raise FlastikError(msg)
 
@@ -1093,9 +1096,7 @@ class StaticFile:
         elif os.path.splitext(dest)[-1]:  # is the file name specified in dest?
             # sanity check
             if os.path.splitext(dest)[-1] != os.path.splitext(source)[-1]:
-                msg = (
-                    f"Source and destination must have the same extension: {source} ~= {dest}"
-                )
+                msg = f"Source and destination must have the same extension: {source} ~= {dest}"
                 log.error(msg)
                 raise FlastikError(msg)
             filename = dest
@@ -1113,7 +1114,8 @@ class StaticFile:
             zip(
                 self.storage["builder"],
                 self.storage["type"],
-                self.storage["destination"], strict=False,
+                self.storage["destination"],
+                strict=False,
             )
         )
         if (self.builder, self.type, filename) not in taken:
@@ -1122,9 +1124,7 @@ class StaticFile:
             if handle_duplicate:  # define unique subfolder
                 self.destination = os.path.join(str(uuid4()), filename)
             else:
-                msg = (
-                    f"{os.path.join(self.type, filename)} is already in use. Change source name or destination using the 'dest' option"
-                )
+                msg = f"{os.path.join(self.type, filename)} is already in use. Change source name or destination using the 'dest' option"
                 log.error(msg)
                 raise FlastikError(msg)
         log.info("File Name & Destination: %s & %s", filename, self.destination)
@@ -1236,6 +1236,7 @@ class Download(StaticFile):
 
     # TODO: add similar templating methods specific to downloads below
 
+
 def collect_static_files(
     static_root=None,
     overwrite_static=True,
@@ -1292,7 +1293,8 @@ def collect_static_files(
             StaticFile.storage["source"],
             StaticFile.storage["destination"],
             StaticFile.storage["type"],
-            StaticFile.storage["builder"], strict=False,
+            StaticFile.storage["builder"],
+            strict=False,
         )
         if owner is builder or owner is None
     ]

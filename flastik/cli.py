@@ -2,6 +2,7 @@
 Flastik - A Flask-like Tiny-framework for static websites.
 (c) Copyright 2019-2026. See LICENSE for details.
 """
+
 import logging
 import os
 import shutil
@@ -14,6 +15,7 @@ import flastik
 # Standard logging
 log = logging.getLogger(__name__)
 
+
 def main(args=None):
     """The main routine."""
     if args is None:
@@ -22,15 +24,23 @@ def main(args=None):
 
     arg_parser = ArgumentParser()
     # Create line command: flastik create_project NAME => creates standard project structure
-    arg_parser.add_argument("--create_project", dest="project",
-                            type=str, nargs='?', default=False,
-                            help="Create a new static website folder project "
-                                 "with Flastik.\nSpecify your project name "
-                                 "after the option tag.")
+    arg_parser.add_argument(
+        "--create_project",
+        dest="project",
+        type=str,
+        nargs="?",
+        default=False,
+        help="Create a new static website folder project "
+        "with Flastik.\nSpecify your project name "
+        "after the option tag.",
+    )
     # Create line command: flastik create_doc => create website with documentation
-    arg_parser.add_argument("--create_doc", dest="create_doc",
-                            action="store_true",
-                            help="Create the Flastik documentation locally.")
+    arg_parser.add_argument(
+        "--create_doc",
+        dest="create_doc",
+        action="store_true",
+        help="Create the Flastik documentation locally.",
+    )
     options = arg_parser.parse_args(args=args)
 
     if options.project:
@@ -54,18 +64,20 @@ def build_project_folder(project_path):
     # Copy templates
     package_path = os.path.dirname(flastik.__file__)
 
-    orig = os.path.join(package_path, 'base_templates')
-    dest = os.path.join(project_path, 'templates')
+    orig = os.path.join(package_path, "base_templates")
+    dest = os.path.join(project_path, "templates")
     shutil.copytree(orig, dest)
     # Create builder script from template
     basename = os.path.basename(project_path)
     file_name = basename + ".py"
-    with open(os.path.join(project_path, file_name), 'w') as f:
+    with open(os.path.join(project_path, file_name), "w") as f:
         f.write(builder_template)
     # Communicate with user
-    msg = (f"Your {basename}'s project folder has been built.\n"
-           f"Change directory to {project_path} and run 'python {file_name} -h' to check the "
-           "available options for building/deploying your website.")
+    msg = (
+        f"Your {basename}'s project folder has been built.\n"
+        f"Change directory to {project_path} and run 'python {file_name} -h' to check the "
+        "available options for building/deploying your website."
+    )
     print(msg)
 
 
@@ -96,44 +108,55 @@ def build_doc(doc_path):
     # Crawling Package for docstrings
     package_path = os.path.dirname(flastik.__file__)
     functions = {}
-    for f in [ii for ii in getmembers(flastik, isfunction) if 'flastik' in ii[1].__module__]:
+    for f in [
+        ii for ii in getmembers(flastik, isfunction) if "flastik" in ii[1].__module__
+    ]:
         if f[1].__doc__:
             functions[f[0]] = escape_doc(f[1])
     classes = {}
-    for c in [ii for ii in getmembers(flastik, isclass) if 'flastik' in ii[1].__module__]:
-        classes[c[0]] = {'doc': None}
+    for c in [
+        ii for ii in getmembers(flastik, isclass) if "flastik" in ii[1].__module__
+    ]:
+        classes[c[0]] = {"doc": None}
         # List methods
-        classes[c[0]]['methods'] = {}
+        classes[c[0]]["methods"] = {}
         for m in getmembers(c[1], isfunction):
             if m[0] == "__init__":
-                classes[c[0]]['doc'] = escape_doc(m[1])
+                classes[c[0]]["doc"] = escape_doc(m[1])
             elif m[0][0] == "_":
                 continue
             else:
-                classes[c[0]]['methods'][m[0]] = escape_doc(m[1])
+                classes[c[0]]["methods"][m[0]] = escape_doc(m[1])
         # List properties
-        classes[c[0]]['properties'] = {}
+        classes[c[0]]["properties"] = {}
         for p in getmembers(c[1], lambda o: isinstance(o, property)):
-            classes[c[0]]['properties'][p[0]] = escape_doc(p[1])
+            classes[c[0]]["properties"][p[0]] = escape_doc(p[1])
     # Instantiating Builder
-    website = flastik.Builder(template_dirs=os.path.join(package_path, 'doc_templates'))
+    website = flastik.Builder(template_dirs=os.path.join(package_path, "doc_templates"))
     # Defining some common context
     context = {
-        'project_name': 'Flastik',
-        'project_url': "https://github.com/theelectricbrain",
-        'footer_link': {'name': 'Powered by Flastik - Copyright 2019-2026', 'url': 'https://github.com/theelectricbrain'},
+        "project_name": "Flastik",
+        "project_url": "https://github.com/theelectricbrain",
+        "footer_link": {
+            "name": "Powered by Flastik - Copyright 2019-2026",
+            "url": "https://github.com/theelectricbrain",
+        },
     }
+
     # Views
     @website.route("/flastik.html")
     def home_page():
-        context['title'] = "Flastik's Home Page"
-        context['title_text'] = "Flastik"
-        context['sub_title'] = "A tiny-framework for static website design"
-        context['readme'] = flastik.Download(
-            "Read Me", os.path.join(website.package_path, "README.pdf"))
-        context['license'] = flastik.Download(
-            "GNU GPL Version 3 License", os.path.join(website.package_path, "LICENSE.txt"))
-        context['intro'] = (
+        context["title"] = "Flastik's Home Page"
+        context["title_text"] = "Flastik"
+        context["sub_title"] = "A tiny-framework for static website design"
+        context["readme"] = flastik.Download(
+            "Read Me", os.path.join(website.package_path, "README.pdf")
+        )
+        context["license"] = flastik.Download(
+            "GNU GPL Version 3 License",
+            os.path.join(website.package_path, "LICENSE.txt"),
+        )
+        context["intro"] = (
             "Flastik is a tiny-framework for static website design inspired "
             "by Flask micro-framework. "
             "It provides tools for designing simple static website project "
@@ -145,27 +168,31 @@ def build_doc(doc_path):
             "and functions have been designed in order to ease the management "
             "and templating of images, downloads and other static files "
             "(see StaticFile, Image and Download classes as well as "
-            "collect_static_files function).")
+            "collect_static_files function)."
+        )
         return flastik.render_template("home_page.html", **context)
 
     @website.route("/classes/")
     def classes_page():
-        context['title'] = "Flastik's Classes"
-        context['classes'] = classes
+        context["title"] = "Flastik's Classes"
+        context["classes"] = classes
         return flastik.render_template("classes_page.html", **context)
 
     @website.route("/functions/")
     def functions_page():
-        context['title'] = "Flastik's Functions"
-        context['functions'] = functions
+        context["title"] = "Flastik's Functions"
+        context["functions"] = functions
         return flastik.render_template("functions_page.html", **context)
+
     # Building website and collecting statics
     website.build(dest=doc_path)
     flastik.collect_static_files()
     # Communicate with user
-    msg = ("Flastik's documentation website has been built.\n"
-           f"Change directory to {doc_path} and open flastik.html with your favorite "
-           "web browser.")
+    msg = (
+        "Flastik's documentation website has been built.\n"
+        f"Change directory to {doc_path} and open flastik.html with your favorite "
+        "web browser."
+    )
     print(msg)
 
 
@@ -240,4 +267,3 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     main()
-
