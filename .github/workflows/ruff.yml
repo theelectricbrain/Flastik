@@ -1,4 +1,4 @@
-name: Lint via Ruff
+name: Ruff Lint and Format
 
 on:
   push:
@@ -20,5 +20,7 @@ jobs:
           python-version: "3.13"
       - name: Install Ruff
         run: pip install ruff==0.16.0
-      - name: Run Ruff
+      - name: Ruff Check
         run: ruff check --output-format=github .
+      - name: Ruff Format
+        run: ruff format --check .
