@@ -529,7 +529,7 @@ class Builder:
                 #  * then render
                 rendered_html = view()
                 #  * finally write to html file
-                log.info("Writting %s at %s/%s", html_name, self.dest, route)
+                log.info("Writing %s at %s/%s", html_name, self.dest, route)
                 self._write_html_file(html_name, route, rendered_html)
             else:
                 for vv in route_vars:
@@ -539,7 +539,7 @@ class Builder:
                     #  * then render
                     rendered_html = view(*vv)
                     #  * finally write to html file
-                    log.info("Writting %s at %s/%s", html_name, self.dest, route)
+                    log.info("Writing %s at %s/%s", html_name, self.dest, route)
                     self._write_html_file(html_name, route, rendered_html)
 
     # Static Methods

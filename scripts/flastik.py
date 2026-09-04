@@ -66,7 +66,7 @@ def build_project_folder(project_path):
     # Communicate with user
     msg = ("Your %s's project folder has been built.\n"
            "Change directory to %s and run 'python %s -h' to check the "
-           "available options for building/deploying your webiste.") % (
+           "available options for building/deploying your website.") % (
         basename, project_path, file_name)
     print(msg)
 
