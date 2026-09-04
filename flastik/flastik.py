@@ -609,7 +609,7 @@ class Builder:
                     route = route_pattern
                     self.current_route = route
                     rendered_html = view()
-                    log.info("Writting %s at %s/%s", html_name, self.dest, route)
+                    log.info("Writing %s at %s/%s", html_name, self.dest, route)
                     self._write_html_file(html_name, route, rendered_html)
                     done += 1
                     self._report_progress(done, total)
@@ -618,7 +618,7 @@ class Builder:
                         route = route_pattern % vv
                         self.current_route = route
                         rendered_html = view(*vv)
-                        log.info("Writting %s at %s/%s", html_name, self.dest, route)
+                        log.info("Writing %s at %s/%s", html_name, self.dest, route)
                         self._write_html_file(html_name, route, rendered_html)
                         done += 1
                         self._report_progress(done, total)
