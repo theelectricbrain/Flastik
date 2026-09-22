@@ -18,9 +18,11 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: "3.13"
-      - name: Install Ruff
-        run: pip install ruff==0.16.0
+      - name: Install pre-commit
+        run: pip install pre-commit
       - name: Ruff Check
-        run: ruff check --output-format=github .
+        run: pre-commit run ruff-check --all-files
+        env:
+          RUFF_OUTPUT_FORMAT: github
       - name: Ruff Format
-        run: ruff format --check .
+        run: pre-commit run ruff-format --all-files --show-diff-on-failure
